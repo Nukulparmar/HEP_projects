@@ -1,5 +1,5 @@
-#define had_tau_cxx
-#include "had_tau.h"
+#define one_mu_cxx
+#include "one_mu.h"
 #include <TH2.h>
 #include <TStyle.h>
 #include <TCanvas.h>
@@ -25,7 +25,7 @@ int main(int argc, char* argv[])
   const char *outFileName   = argv[2];
   const char *data          = argv[3];
 
-  had_tau ana(inputFileList, outFileName, data);
+  one_mu ana(inputFileList, outFileName, data);
   cout << "dataset " << data << " " << endl;
 
   ana.EventLoop(data,inputFileList);
@@ -33,7 +33,7 @@ int main(int argc, char* argv[])
   return 0;
 }
 
-void had_tau::EventLoop(const char *data,const char *inputFileList)
+void one_mu::EventLoop(const char *data,const char *inputFileList)
 { 
   if (fChain == 0) return;
 
@@ -83,9 +83,9 @@ void had_tau::EventLoop(const char *data,const char *inputFileList)
       if(goodphoton.Pt()<100) continue; // remove events with 0 photons or pt<100
       if(electron_match_photon(goodphoton)) continue; // don't want electron matched to good photon
 
-      if(Muons->size()>0) continue; // veto muons
-      if(Electrons->size()>0) continue; //  no reco electrons
-      if(isoMuonTracks!=0 || isoPionTracks!=0 || isoElectronTracks!=0) continue;
+      if(Muons->size()!=1) continue; // 1 reco muons
+      if(Electrons->size()>0) continue;  // no electrons
+      if(isoElectronTracks!=0 || isoPionTracks!=0) continue;
 
       vector<TLorentzVector> goodjets;
       double mindr = 100.0,ht=0;
@@ -132,16 +132,16 @@ void had_tau::EventLoop(const char *data,const char *inputFileList)
 	      if((abs((*GenParticles_PdgId)[i])==11) && (abs((*GenParticles_ParentId)[i])<=24) && ((*GenParticles_Status)[i]==1))
 		{ 
 		  gen_el.push_back((*GenParticles)[i]);
-		  if(abs((*GenParticles_ParentId)[i])==15)
+		  if(abs((*GenParticles_ParentId)[i])<=15)
 		    {gen_tau_el.push_back((*GenParticles)[i]);}
 		}
 	      if((abs((*GenParticles_PdgId)[i])==13) && (abs((*GenParticles_ParentId)[i])<=24) && ((*GenParticles_Status)[i]==1))
 		{ 
 		  gen_mu.push_back((*GenParticles)[i]);
-		  if(abs((*GenParticles_ParentId)[i])==15)
+		  if(abs((*GenParticles_ParentId)[i])<=15)
 		    {gen_tau_mu.push_back((*GenParticles)[i]);}
 		}
-	      if((abs((*GenParticles_PdgId)[i])==15) && (abs((*GenParticles_ParentId)[i])<=24))
+	      if((abs((*GenParticles_PdgId)[i])==15) && (abs((*GenParticles_ParentId)[i])<=24) && ((*GenParticles_Status)[i]==1))
 		{ 
 		  gen_tau.push_back((*GenParticles)[i]);
 		}
@@ -149,15 +149,21 @@ void had_tau::EventLoop(const char *data,const char *inputFileList)
 	    }
 	}
 
-      if(gen_el.size()!=0 && gen_mu.size()!=0) continue; // only hadronic decays
-      //if(gen_tau_el.size()!=0 && gen_tau_mu.size()!=0) continue;
-      if(gen_tau.size()==0) continue; // only tau events passes
-      sortTLorVec(&gen_tau);
-      
+      if(gen_el.size()!=0) continue; // rejecting hadronic tau decays
+      if(gen_mu.size()==0) continue; // only events with gen level electrons are selected
+      if(Muons->size()==0)
+      	{
+      	  if(isoMuonTracks!=0 || isoElectronTracks!=0 || isoPionTracks!=0) continue;
+      	  if(gen_el.size()!=0) continue;
+      	  if(gen_mu.size()==0) continue;
+      	}
+
+      sortTLorVec(&gen_el);
+
       // checking if the photon is real or fake
 
       bool realphoton = true;
-      int match_el=0,match_p=0;
+      int match_el,match_p=0;
       double mindr_ph_genobj = 100,match_el_pt=0.0,match_ph_pt=0.0;
       for(int i=0;i<GenParticles->size();i++)
 	{ if((*GenParticles)[i].Pt()!=0)
@@ -181,72 +187,46 @@ void had_tau::EventLoop(const char *data,const char *inputFileList)
 	}
 
       if(match_el==1 && match_p==0) realphoton = false;
-      
       if(!realphoton) continue;
-      
 
-      // tau matching with jets 
+      // electron matching with jets and lost in a jet
 
-      double mindr_tau_jet = 100.0;
-      int index_jet_match_tau = -1;
-      bool tau_match_jet = false;
-      
-      for(int j=0;j<gen_tau.size();j++)
-	{
-	  { for(int i=0;i<Jets->size();i++)
-	      {
-		if((*Jets)[i].Pt()>30 && abs((*Jets)[i].Eta())<=2.5)
-		  {
-		    double dr = gen_tau[j].DeltaR((*Jets)[i]);
-			if(dr<mindr_tau_jet)
-			  { mindr_tau_jet = dr;
-			    index_jet_match_tau = i;
-			  }
-		  }
-	      }
-	  }
-	  if(mindr_tau_jet<0.3)
-	    { tau_match_jet = true;
-	      
-	    }
-	  
-	}
-      
-      if(!tau_match_jet) continue;
-	 
+      double mindr_el_jet = 100.0;
+      int index_jet_match_el = -1;
 
-      
-      
+      if(gamma_matching_jet_index>=0 && ((*Jets)[gamma_matching_jet_index].Pt())/(goodphoton.Pt())<1.0) continue;
+      if(gamma_matching_jet_index<0) continue;
+
       if(MET>100 && goodjets.size()>=2 && (dphi1>0.3 && dphi2 >0.3) && ht>100 && goodphoton.Pt()>100)
 	{ survived_events+=1;
-	  
+
 	  if(BTags==0)
 	    { if(goodjets.size()>=2 && goodjets.size()<=4)
 		{		  
-		  hadtau->Fill(1,1);
+		  one_muon->Fill(1,1);
 		}
 	      if(goodjets.size()>=5 && goodjets.size()<=6)
 		{
-		  hadtau->Fill(3,1);
+		  one_muon->Fill(3,1);
 		}
 	      if(goodjets.size()>=7)
 		{
-		  hadtau->Fill(5,1);
+		  one_muon->Fill(5,1);
 		}
 
 	    }
 	  if(BTags>=1)
 	    { if(goodjets.size()>=2 && goodjets.size()<=4)
 		{
-		  hadtau->Fill(2,1);
+		  one_muon->Fill(2,1);
 		}
 	      if(goodjets.size()>=5 && goodjets.size()<=6)
 		{
-		  hadtau->Fill(4,1);
+		  one_muon->Fill(4,1);
 		}
 	      if(goodjets.size()>=7)
 		{
-		  hadtau->Fill(6,1);
+		  one_muon->Fill(6,1);
 		}
 	      
 	    }	
@@ -257,12 +237,12 @@ void had_tau::EventLoop(const char *data,const char *inputFileList)
 
       
     }// loop over entries
+
   cout<<"Events survived = "<<survived_events;
-  
 }
 	
   
-bool had_tau::electron_match_photon(TLorentzVector photon)
+bool one_mu::electron_match_photon(TLorentzVector photon)
 { for(int i=0;i<Electrons->size();i++)
     { if(photon.DeltaR((*Electrons)[i])<0.2)
 	{ return true;

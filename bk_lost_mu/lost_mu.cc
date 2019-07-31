@@ -200,7 +200,7 @@ void lost_mu::EventLoop(const char *data,const char *inputFileList)
 
       if(Muons->size()==0)
 	{
-	  if(match_el==1 && match_p) realphoton = true;
+	  if(match_el==1 && match_p==0) realphoton = true;
 	  // else if(match_el==1 && match_p==0) realphoton=false;
 	  // else if(match_el==1 && match_p==1)
 	  //   { if(abs(goodphoton.Pt() - match_ph_pt) > abs(goodphoton.Pt()-match_el_pt))
@@ -217,7 +217,7 @@ void lost_mu::EventLoop(const char *data,const char *inputFileList)
       int index_jet_match_el = -1;
 
 
-      if(gamma_matching_jet_index>=0 && ((*Jets)[gamma_matching_jet_index].Pt())/((*Electrons)[0].Pt())<1.0) continue;
+      if(gamma_matching_jet_index>=0 && ((*Jets)[gamma_matching_jet_index].Pt())/(goodphoton.Pt())<1.0) continue;
        if(gamma_matching_jet_index<0) continue;
 
 
@@ -231,22 +231,22 @@ void lost_mu::EventLoop(const char *data,const char *inputFileList)
 		}
 	      if(goodjets.size()>=5 && goodjets.size()<=6)
 		{
-		  ll_mu->Fill(2,1);
+		  ll_mu->Fill(3,1);
 		}
 	      if(goodjets.size()>=7)
 		{
-		  ll_mu->Fill(3,1);
+		  ll_mu->Fill(5,1);
 		}
 
 	    }
 	  if(BTags>=1)
 	    { if(goodjets.size()>=2 && goodjets.size()<=4)
 		{
-		  ll_mu->Fill(4,1);
+		  ll_mu->Fill(2,1);
 		}
 	      if(goodjets.size()>=5 && goodjets.size()<=6)
 		{
-		  ll_mu->Fill(5,1);
+		  ll_mu->Fill(4,1);
 		}
 	      if(goodjets.size()>=7)
 		{

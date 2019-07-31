@@ -189,22 +189,22 @@ void fake_photon::EventLoop(const char *data,const char *inputFileList)
 		}
 	      if(goodjets.size()>=5 && goodjets.size()<=6)
 		{
-		  faking_photon->Fill(2,1);
+		  faking_photon->Fill(3,1);
 		}
 	      if(goodjets.size()>=7)
 		{
-		  faking_photon->Fill(3,1);
+		  faking_photon->Fill(5,1);
 		}
 
 	    }
 	  if(BTags>=1)
 	    { if(goodjets.size()>=2 && goodjets.size()<=4)
 		{
-		  faking_photon->Fill(4,1);
+		  faking_photon->Fill(2,1);
 		}
 	      if(goodjets.size()>=5 && goodjets.size()<=6)
 		{
-		  faking_photon->Fill(5,1);
+		  faking_photon->Fill(4,1);
 		}
 	      if(goodjets.size()>=7)
 		{

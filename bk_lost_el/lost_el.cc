@@ -174,7 +174,7 @@ void lost_el::EventLoop(const char *data,const char *inputFileList)
       // checking if the photon is real or fake
 
       bool realphoton = true;
-      int match_el,match_p=0;
+      int match_el=0,match_p=0;
       double mindr_ph_genobj = 100,match_el_pt=0.0,match_ph_pt=0.0;
       for(int i=0;i<GenParticles->size();i++)
 	{ if((*GenParticles)[i].Pt()!=0)
@@ -199,7 +199,7 @@ void lost_el::EventLoop(const char *data,const char *inputFileList)
 
       if(Electrons->size()==0)
 	{
-	  if(match_el==1 && match_p) realphoton = true;
+	  if(match_el==0) realphoton = true;
 	  else if(match_el==1 && match_p==0) realphoton=false;
 	  else if(match_el==1 && match_p==1)
 	    { if(abs(goodphoton.Pt() - match_ph_pt) > abs(goodphoton.Pt()-match_el_pt))
@@ -243,22 +243,22 @@ void lost_el::EventLoop(const char *data,const char *inputFileList)
 		}
 	      if(goodjets.size()>=5 && goodjets.size()<=6)
 		{
-		  ll->Fill(2,1);
+		  ll->Fill(3,1);
 		}
 	      if(goodjets.size()>=7)
 		{
-		  ll->Fill(3,1);
+		  ll->Fill(5,1);
 		}
 
 	    }
 	  if(BTags>=1)
 	    { if(goodjets.size()>=2 && goodjets.size()<=4)
 		{
-		  ll->Fill(4,1);
+		  ll->Fill(2,1);
 		}
 	      if(goodjets.size()>=5 && goodjets.size()<=6)
 		{
-		  ll->Fill(5,1);
+		  ll->Fill(4,1);
 		}
 	      if(goodjets.size()>=7)
 		{

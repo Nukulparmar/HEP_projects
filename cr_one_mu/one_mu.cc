@@ -122,84 +122,90 @@ void one_mu::EventLoop(const char *data,const char *inputFileList)
       if(goodjets.size()>0) dphi1 = abs(DeltaPhi(METPhi,goodjets[0].Phi()));
       if(goodjets.size()>1) dphi2 = abs(DeltaPhi(METPhi,goodjets[1].Phi()));
 
-      // ----------------------  Gen level -------------------------
-      vector<TLorentzVector> gen_el, gen_mu,gen_tau,gen_tau_el,gen_tau_mu;
-      int nGenMu=0,nGenEle=0,nGenTau=0,nGenMuFmTau=0,nGenEleFmTau=0;
+      // // ----------------------  Gen level -------------------------
+      // vector<TLorentzVector> gen_el, gen_mu,gen_tau,gen_tau_el,gen_tau_mu;
+      // int nGenMu=0,nGenEle=0,nGenTau=0,nGenMuFmTau=0,nGenEleFmTau=0;
 
-      for(int i=0;i<GenParticles->size();i++)
-	{ if((*GenParticles)[i].Pt()!=0)
-	    {
-	      if((abs((*GenParticles_PdgId)[i])==11) && (abs((*GenParticles_ParentId)[i])<=24) && ((*GenParticles_Status)[i]==1))
-		{ 
-		  gen_el.push_back((*GenParticles)[i]);
-		  if(abs((*GenParticles_ParentId)[i])<=15)
-		    {gen_tau_el.push_back((*GenParticles)[i]);}
-		}
-	      if((abs((*GenParticles_PdgId)[i])==13) && (abs((*GenParticles_ParentId)[i])<=24) && ((*GenParticles_Status)[i]==1))
-		{ 
-		  gen_mu.push_back((*GenParticles)[i]);
-		  if(abs((*GenParticles_ParentId)[i])<=15)
-		    {gen_tau_mu.push_back((*GenParticles)[i]);}
-		}
-	      if((abs((*GenParticles_PdgId)[i])==15) && (abs((*GenParticles_ParentId)[i])<=24) && ((*GenParticles_Status)[i]==1))
-		{ 
-		  gen_tau.push_back((*GenParticles)[i]);
-		}
+      // for(int i=0;i<GenParticles->size();i++)
+      // 	{ if((*GenParticles)[i].Pt()!=0)
+      // 	    {
+      // 	      if((abs((*GenParticles_PdgId)[i])==11) && (abs((*GenParticles_ParentId)[i])<=24) && ((*GenParticles_Status)[i]==1))
+      // 		{ 
+      // 		  gen_el.push_back((*GenParticles)[i]);
+      // 		  if(abs((*GenParticles_ParentId)[i])<=15)
+      // 		    {gen_tau_el.push_back((*GenParticles)[i]);}
+      // 		}
+      // 	      if((abs((*GenParticles_PdgId)[i])==13) && (abs((*GenParticles_ParentId)[i])<=24) && ((*GenParticles_Status)[i]==1))
+      // 		{ 
+      // 		  gen_mu.push_back((*GenParticles)[i]);
+      // 		  if(abs((*GenParticles_ParentId)[i])<=15)
+      // 		    {gen_tau_mu.push_back((*GenParticles)[i]);}
+      // 		}
+      // 	      if((abs((*GenParticles_PdgId)[i])==15) && (abs((*GenParticles_ParentId)[i])<=24) && ((*GenParticles_Status)[i]==1))
+      // 		{ 
+      // 		  gen_tau.push_back((*GenParticles)[i]);
+      // 		}
 	      
-	    }
-	}
+      // 	    }
+      // 	}
 
-      if(gen_el.size()!=0) continue; // rejecting hadronic tau decays
-      if(gen_mu.size()==0) continue; // only events with gen level electrons are selected
-      if(Muons->size()==0)
-      	{
-      	  if(isoMuonTracks!=0 || isoElectronTracks!=0 || isoPionTracks!=0) continue;
-      	  if(gen_el.size()!=0) continue;
-      	  if(gen_mu.size()==0) continue;
-      	}
+      // if(gen_el.size()!=0) continue; // rejecting hadronic tau decays
+      // if(gen_mu.size()==0) continue; // only events with gen level electrons are selected
+      // if(Muons->size()==0)
+      // 	{
+      // 	  if(isoMuonTracks!=0 || isoElectronTracks!=0 || isoPionTracks!=0) continue;
+      // 	  if(gen_el.size()!=0) continue;
+      // 	  if(gen_mu.size()==0) continue;
+      // 	}
 
-      sortTLorVec(&gen_el);
+      // sortTLorVec(&gen_el);
 
-      // checking if the photon is real or fake
+      // // checking if the photon is real or fake
 
-      bool realphoton = true;
-      int match_el,match_p=0;
-      double mindr_ph_genobj = 100,match_el_pt=0.0,match_ph_pt=0.0;
-      for(int i=0;i<GenParticles->size();i++)
-	{ if((*GenParticles)[i].Pt()!=0)
-	    { double dr1=goodphoton.DeltaR((*GenParticles)[i]);
-	      if(dr1<0.2 && abs((*GenParticles_PdgId)[i])==11 && abs((*GenParticles_ParentId)[i])<=24)
-		{ match_el=1;
-		  match_el_pt=(*GenParticles)[i].Pt();
-		}
-	      if(mindr_ph_genobj > dr1) { mindr_ph_genobj = dr1;}
-	    }
-	}
+      // bool realphoton = true;
+      // int match_el,match_p=0;
+      // double mindr_ph_genobj = 100,match_el_pt=0.0,match_ph_pt=0.0;
+      // for(int i=0;i<GenParticles->size();i++)
+      // 	{ if((*GenParticles)[i].Pt()!=0)
+      // 	    { double dr1=goodphoton.DeltaR((*GenParticles)[i]);
+      // 	      if(dr1<0.2 && abs((*GenParticles_PdgId)[i])==11 && abs((*GenParticles_ParentId)[i])<=24)
+      // 		{ match_el=1;
+      // 		  match_el_pt=(*GenParticles)[i].Pt();
+      // 		}
+      // 	      if(mindr_ph_genobj > dr1) { mindr_ph_genobj = dr1;}
+      // 	    }
+      // 	}
 
-      for(int i=0;i<GenParticles->size();i++)
-	{ if((*GenParticles)[i].Pt()!=0)
-	    { double dr1=goodphoton.DeltaR((*GenParticles)[i]);
-	      if(dr1<0.2 && abs((*GenParticles_PdgId)[i])==22)
-		{ match_p=1;
-		  match_ph_pt=(*GenParticles)[i].Pt();
-		}
-	    }
-	}
+      // for(int i=0;i<GenParticles->size();i++)
+      // 	{ if((*GenParticles)[i].Pt()!=0)
+      // 	    { double dr1=goodphoton.DeltaR((*GenParticles)[i]);
+      // 	      if(dr1<0.2 && abs((*GenParticles_PdgId)[i])==22)
+      // 		{ match_p=1;
+      // 		  match_ph_pt=(*GenParticles)[i].Pt();
+      // 		}
+      // 	    }
+      // 	}
 
-      if(match_el==1 && match_p==0) realphoton = false;
-      if(!realphoton) continue;
+      // if(match_el==1 && match_p==0) realphoton = false;
+      // if(!realphoton) continue;
 
-      // electron matching with jets and lost in a jet
+      // // electron matching with jets and lost in a jet
 
-      double mindr_el_jet = 100.0;
-      int index_jet_match_el = -1;
+      // double mindr_el_jet = 100.0;
+      // int index_jet_match_el = -1;
 
       if(gamma_matching_jet_index>=0 && ((*Jets)[gamma_matching_jet_index].Pt())/(goodphoton.Pt())<1.0) continue;
       if(gamma_matching_jet_index<0) continue;
 
       if(MET>100 && goodjets.size()>=2 && (dphi1>0.3 && dphi2 >0.3) && ht>100 && goodphoton.Pt()>100)
 	{ survived_events+=1;
-
+	  h_ht->Fill(ht,wt);
+	  h_met->Fill(MET,wt);
+	  h_lead_ph_pt->Fill(goodphoton.Pt(),wt);
+	  h_njets->Fill(goodjets.size(),wt);
+	  h_el_size->Fill(Electrons->size(),wt);
+	  h_mu_size->Fill(Muons->size(),wt);
+	  
 	  if(BTags==0)
 	    { if(goodjets.size()>=2 && goodjets.size()<=4)
 		{		  

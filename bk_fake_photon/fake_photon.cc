@@ -181,6 +181,12 @@ void fake_photon::EventLoop(const char *data,const char *inputFileList)
 
       if(MET>100 && goodjets.size()>=2 && (dphi1>0.3 && dphi2 >0.3) && ht>100 && goodphoton.Pt()>100)
 	{ survived_events+=1;
+	  h_ht->Fill(ht,wt);
+	  h_met->Fill(MET,wt);
+	  h_lead_ph_pt->Fill(goodphoton.Pt(),wt);
+	  h_njets->Fill(goodjets.size(),wt);
+	  h_el_size->Fill(Electrons->size(),wt);
+	  h_mu_size->Fill(Muons->size(),wt);
 
 	  if(BTags==0)
 	    { if(goodjets.size()>=2 && goodjets.size()<=4)

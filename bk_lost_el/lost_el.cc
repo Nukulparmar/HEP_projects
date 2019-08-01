@@ -92,10 +92,9 @@ void lost_el::EventLoop(const char *data,const char *inputFileList)
 	mt_ele=sqrt(2*(*Electrons)[0].Pt()*MET*(1-cos(DeltaPhi(METPhi,(*Electrons)[0].Phi()))));
 	if(mt_ele>100) continue;
 	if( ((*Electrons)[0].Pt() < 10) || abs((*Electrons)[0].Eta()) > 2.5 ) continue;
-	//      if(!(*Electrons_tightID)[0]) continue;
       }
       mt_pho=sqrt(2*goodphoton.Pt()*MET*(1-cos(DeltaPhi(METPhi,goodphoton.Phi()))));
-      if(Electrons->size()==1) mt_elepho=sqrt(2*(goodphoton+(*Electrons)[0]).Pt()*MET*(1-cos(DeltaPhi(METPhi,(goodphoton+(*Electrons)[0]).Phi()))));
+      if(Electrons->size()==1) mt_elepho=sqrt(2*(goodphoton+(*Electrons)[0]).Pt()*MET*(1-cos(DeltaPhi(METPhi,(goodphoton+(*Electrons)[0]).Phi()))));   // MHT cut defined in the paper for isolated tracks
 
 
       vector<TLorentzVector> goodjets;
@@ -135,8 +134,7 @@ void lost_el::EventLoop(const char *data,const char *inputFileList)
 
       // ----------------------  Gen level -------------------------
       vector<TLorentzVector> gen_el, gen_mu,gen_tau,gen_tau_el,gen_tau_mu;
-      int nGenMu=0,nGenEle=0,nGenTau=0,nGenMuFmTau=0,nGenEleFmTau=0;
-
+     
       for(int i=0;i<GenParticles->size();i++)
 	{ if((*GenParticles)[i].Pt()!=0)
 	    {
@@ -166,9 +164,9 @@ void lost_el::EventLoop(const char *data,const char *inputFileList)
 	{
 	  if(isoMuonTracks!=0 || isoElectronTracks!=0 || isoPionTracks!=0) continue;
 	  if(gen_el.size()==0) continue;
-	  if(gen_mu.size()!=0) continue;
+	  // if(gen_mu.size()!=0) continue;
 	}
-
+      if(gen_mu.size()!=0) continue; // rejecting all events with gen muons
       sortTLorVec(&gen_el);
 
       // checking if the photon is real or fake
@@ -209,32 +207,39 @@ void lost_el::EventLoop(const char *data,const char *inputFileList)
 	}
       if(!realphoton) continue;
 
-      // electron matching with jets and lost in a jet
+      // electron matching with jets and lost in a jet ( no need to check this as reco electron collection is defined as isolated electrons
 
-      double mindr_el_jet = 100.0;
-      int index_jet_match_el = -1;
+      // double mindr_el_jet = 100.0;
+      // int index_jet_match_el = -1;
 
-      if(Electrons->size()==1)
-	{ for(int i=0;i<Jets->size();i++)
-	    {
-	      if((*Jets)[i].Pt()>30 && abs((*Jets)[i].Eta())<=2.5)
-		{
-		  double dr = (*Electrons)[0].DeltaR((*Jets)[i]);
-		  if(dr<mindr_el_jet)
-		    { mindr_el_jet = dr;
-		      index_jet_match_el = i;}
-		}
-	    }
+      // if(Electrons->size()==1)
+      // 	{ for(int i=0;i<Jets->size();i++)
+      // 	    {
+      // 	      if((*Jets)[i].Pt()>30 && abs((*Jets)[i].Eta())<=2.5)
+      // 		{
+      // 		  double dr = (*Electrons)[0].DeltaR((*Jets)[i]);
+      // 		  if(dr<mindr_el_jet)
+      // 		    { mindr_el_jet = dr;
+      // 		      index_jet_match_el = i;}
+      // 		}
+      // 	    }
 
-	   if(index_jet_match_el>=0 && ((*Jets)[index_jet_match_el].Pt())/((*Electrons)[0].Pt())<1.0) continue;
-	   if(index_jet_match_el<0) continue;
-	}
-       if(gamma_matching_jet_index>=0 && ((*Jets)[gamma_matching_jet_index].Pt())/((*Electrons)[0].Pt())<1.0) continue;
-       if(gamma_matching_jet_index<0) continue;
+      // 	   if(index_jet_match_el>=0 && ((*Jets)[index_jet_match_el].Pt())/((*Electrons)[0].Pt())<1.0) continue;
+      // 	   if(index_jet_match_el<0) continue;
+      // 	}
+      if(gamma_matching_jet_index>=0 && ((*Jets)[gamma_matching_jet_index].Pt())/(goodphoton.Pt())<1.0) continue;
+      if(gamma_matching_jet_index<0) continue;
 
 
       if(MET>100 && goodjets.size()>=2 && (dphi1>0.3 && dphi2 >0.3) && ht>100 && goodphoton.Pt()>100)
 	{ survived_events+=1;
+	  h_ht->Fill(ht,wt);
+	  h_met->Fill(MET,wt);
+	  h_lead_ph_pt->Fill(goodphoton.Pt(),wt);
+	  h_njets->Fill(goodjets.size(),wt);
+	  h_el_size->Fill(Electrons->size(),wt);
+	  h_mu_size->Fill(Muons->size(),wt);
+
 
 	  if(BTags==0)
 	    { if(goodjets.size()>=2 && goodjets.size()<=4)

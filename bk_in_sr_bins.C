@@ -1,10 +1,10 @@
 void bk_in_sr_bins()
-{ TFile *f1 = new TFile("../../EHEP_Projects/Summer_2019/TTJets/ttjets_fake_photon.root");
-  TFile *f2 = new TFile("../../EHEP_Projects/Summer_2019/TTJets/ttjets_had_tau.root");
-  TFile *f3 = new TFile("../../EHEP_Projects/Summer_2019/TTJets/ttjets_ll_mu.root");
-  TFile *f4 = new TFile("../../EHEP_Projects/Summer_2019/TTJets/ttjets_ll.root");
-  TFile *f5 = new TFile("../../EHEP_Projects/Summer_2019/TTJets/ttjets_one_el.root");
-  TFile *f6 = new TFile("../../EHEP_Projects/Summer_2019/TTJets/ttjets_one_mu.root");
+{ TFile *f1 = new TFile("../../EHEP_Projects/Summer_2019/WGJets_to_Lnu/wgjets_lnu_fake_photon.root");
+  TFile *f2 = new TFile("../../EHEP_Projects/Summer_2019/WGJets_to_Lnu/wgjets_lnu_had_tau.root");
+  TFile *f3 = new TFile("../../EHEP_Projects/Summer_2019/WGJets_to_Lnu/wgjets_lnu_ll_mu.root");
+  TFile *f4 = new TFile("../../EHEP_Projects/Summer_2019/WGJets_to_Lnu/wgjets_lnu_ll.root");
+  TFile *f5 = new TFile("../../EHEP_Projects/Summer_2019/WGJets_to_Lnu/wgjets_lnu_one_el.root");
+  TFile *f6 = new TFile("../../EHEP_Projects/Summer_2019/WGJets_to_Lnu/wgjets_lnu_one_mu.root");
 
   TH1D *ll_e,*ll_mu,*fake_photon,*had_tau,*one_el,*one_mu;
 
@@ -70,7 +70,7 @@ void bk_in_sr_bins()
   stack->GetYaxis()->SetLabelSize(0.05);
   stack->GetYaxis()->SetTitle(0);
   stack->GetYaxis()->SetRange(0,2);
-  stack->SetTitle("t#bar{t} Jets");
+  stack->SetTitle("W #gamma Jets W->l#nu");
 
 
   legend->AddEntry(one_lep,"1L CR","f");

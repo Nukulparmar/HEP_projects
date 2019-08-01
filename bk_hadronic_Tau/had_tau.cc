@@ -81,8 +81,7 @@ void had_tau::EventLoop(const char *data,const char *inputFileList)
 	{goodphoton = goodphotons[0];}
 
       if(goodphoton.Pt()<100) continue; // remove events with 0 photons or pt<100
-      if(electron_match_photon(goodphoton)) continue; // don't want electron matched to good photon
-
+      // if(electron_match_photon(goodphoton)) continue; // don't care as electron is rejected
       if(Muons->size()>0) continue; // veto muons
       if(Electrons->size()>0) continue; //  no reco electrons
       if(isoMuonTracks!=0 || isoPionTracks!=0 || isoElectronTracks!=0) continue;
@@ -124,8 +123,7 @@ void had_tau::EventLoop(const char *data,const char *inputFileList)
 
       // ----------------------  Gen level -------------------------
       vector<TLorentzVector> gen_el, gen_mu,gen_tau,gen_tau_el,gen_tau_mu;
-      int nGenMu=0,nGenEle=0,nGenTau=0,nGenMuFmTau=0,nGenEleFmTau=0;
-
+      
       for(int i=0;i<GenParticles->size();i++)
 	{ if((*GenParticles)[i].Pt()!=0)
 	    {
@@ -149,40 +147,40 @@ void had_tau::EventLoop(const char *data,const char *inputFileList)
 	    }
 	}
 
-      if(gen_el.size()!=0 && gen_mu.size()!=0) continue; // only hadronic decays
-      //if(gen_tau_el.size()!=0 && gen_tau_mu.size()!=0) continue;
       if(gen_tau.size()==0) continue; // only tau events passes
+      if(gen_el.size()!=0) continue;  // only single leptonic events are selected hence remove events with gen electron and gen muons ( the defined variables also contain electrons/muons coming from tau )
+      if(gen_mu.size()!=0) continue;
       sortTLorVec(&gen_tau);
       
       // checking if the photon is real or fake
 
-      bool realphoton = true;
-      int match_el=0,match_p=0;
-      double mindr_ph_genobj = 100,match_el_pt=0.0,match_ph_pt=0.0;
-      for(int i=0;i<GenParticles->size();i++)
-	{ if((*GenParticles)[i].Pt()!=0)
-	    { double dr1=goodphoton.DeltaR((*GenParticles)[i]);
-	      if(dr1<0.2 && abs((*GenParticles_PdgId)[i])==11 && abs((*GenParticles_ParentId)[i])<=24)
-		{ match_el=1;
-		  match_el_pt=(*GenParticles)[i].Pt();
-		}
-	      if(mindr_ph_genobj > dr1) { mindr_ph_genobj = dr1;}
-	    }
-	}
+      // bool realphoton = true;
+      // int match_el=0,match_p=0;
+      // double mindr_ph_genobj = 100,match_el_pt=0.0,match_ph_pt=0.0;
+      // for(int i=0;i<GenParticles->size();i++)
+      // 	{ if((*GenParticles)[i].Pt()!=0)
+      // 	    { double dr1=goodphoton.DeltaR((*GenParticles)[i]);
+      // 	      if(dr1<0.2 && abs((*GenParticles_PdgId)[i])==11 && abs((*GenParticles_ParentId)[i])<=24)
+      // 		{ match_el=1;
+      // 		  match_el_pt=(*GenParticles)[i].Pt();
+      // 		}
+      // 	      if(mindr_ph_genobj > dr1) { mindr_ph_genobj = dr1;}
+      // 	    }
+      // 	}
 
-      for(int i=0;i<GenParticles->size();i++)
-	{ if((*GenParticles)[i].Pt()!=0)
-	    { double dr1=goodphoton.DeltaR((*GenParticles)[i]);
-	      if(dr1<0.2 && abs((*GenParticles_PdgId)[i])==22)
-		{ match_p=1;
-		  match_ph_pt=(*GenParticles)[i].Pt();
-		}
-	    }
-	}
+      // for(int i=0;i<GenParticles->size();i++)
+      // 	{ if((*GenParticles)[i].Pt()!=0)
+      // 	    { double dr1=goodphoton.DeltaR((*GenParticles)[i]);
+      // 	      if(dr1<0.2 && abs((*GenParticles_PdgId)[i])==22)
+      // 		{ match_p=1;
+      // 		  match_ph_pt=(*GenParticles)[i].Pt();
+      // 		}
+      // 	    }
+      // 	}
 
-      if(match_el==1 && match_p==0) realphoton = false;
+      // if(match_el==1 && match_p==0) realphoton = false;
       
-      if(!realphoton) continue;
+      // if(!realphoton) continue;
       
 
       // tau matching with jets 
@@ -219,6 +217,13 @@ void had_tau::EventLoop(const char *data,const char *inputFileList)
       
       if(MET>100 && goodjets.size()>=2 && (dphi1>0.3 && dphi2 >0.3) && ht>100 && goodphoton.Pt()>100)
 	{ survived_events+=1;
+	  h_ht->Fill(ht,wt);
+	  h_met->Fill(MET,wt);
+	  h_lead_ph_pt->Fill(goodphoton.Pt(),wt);
+	  h_njets->Fill(goodjets.size(),wt);
+	  h_el_size->Fill(Electrons->size(),wt);
+	  h_mu_size->Fill(Muons->size(),wt);
+
 	  
 	  if(BTags==0)
 	    { if(goodjets.size()>=2 && goodjets.size()<=4)

@@ -49,6 +49,8 @@ class NtupleVariables : public TSelector {
    Double_t        CrossSection;
    Int_t           CSCTightHaloFilter;
    Int_t           ecalBadCalibFilter;
+   Bool_t          ecalBadCalibReducedExtraFilter;
+   Bool_t          ecalBadCalibReducedFilter;
    Int_t           EcalDeadCellTriggerPrimitiveFilter;
    Int_t           eeBadScFilter;
    vector<TLorentzVector> *Electrons;
@@ -61,6 +63,7 @@ class NtupleVariables : public TSelector {
    vector<bool>    *Electrons_passIso;
    vector<bool>    *Electrons_tightID;
    vector<double>  *Electrons_TrkEnergyCorr;
+   Double_t        fixedGridRhoFastjetAll;
    vector<TLorentzVector> *GenElectrons;
    vector<bool>    *GenElectrons_fromTau;
    vector<double>  *GenElectrons_MT2Activity;
@@ -86,7 +89,6 @@ class NtupleVariables : public TSelector {
    vector<int>     *GenParticles_ParentIdx;
    vector<int>     *GenParticles_PdgId;
    vector<int>     *GenParticles_Status;
-   vector<bool>    *GenParticles_TTFlag;
    vector<TLorentzVector> *GenTaus;
    vector<bool>    *GenTaus_had;
    vector<double>  *GenTaus_LeadRecoTrkAct;
@@ -222,6 +224,9 @@ class NtupleVariables : public TSelector {
    Int_t           NJetsJERdown;
    Int_t           NJetsJERup;
    Int_t           NMuons;
+   Double_t        NonPrefiringProb;
+   Double_t        NonPrefiringProbDown;
+   Double_t        NonPrefiringProbUp;
    Double_t        NumEvents;
    Int_t           NumInteractions;
    Int_t           NVtx;
@@ -232,7 +237,7 @@ class NtupleVariables : public TSelector {
    vector<bool>    *Photons_fullID;
    vector<double>  *Photons_genMatched;
    vector<double>  *Photons_hadTowOverEM;
-   vector<double>  *Photons_hasPixelSeed;
+   vector<bool>    *Photons_hasPixelSeed;
    vector<double>  *Photons_isEB;
    vector<bool>    *Photons_nonPrompt;
    vector<double>  *Photons_passElectronVeto;
@@ -276,6 +281,7 @@ class NtupleVariables : public TSelector {
    vector<TLorentzVector> *ZCandidates;
 
    // List of branches
+
    TBranch        *b_RunNum;   //!
    TBranch        *b_LumiBlockNum;   //!
    TBranch        *b_EvtNum;   //!
@@ -296,6 +302,8 @@ class NtupleVariables : public TSelector {
    TBranch        *b_CrossSection;   //!
    TBranch        *b_CSCTightHaloFilter;   //!
    TBranch        *b_ecalBadCalibFilter;   //!
+   TBranch        *b_ecalBadCalibReducedExtraFilter;   //!
+   TBranch        *b_ecalBadCalibReducedFilter;   //!
    TBranch        *b_EcalDeadCellTriggerPrimitiveFilter;   //!
    TBranch        *b_eeBadScFilter;   //!
    TBranch        *b_Electrons;   //!
@@ -308,6 +316,7 @@ class NtupleVariables : public TSelector {
    TBranch        *b_Electrons_passIso;   //!
    TBranch        *b_Electrons_tightID;   //!
    TBranch        *b_Electrons_TrkEnergyCorr;   //!
+   TBranch        *b_fixedGridRhoFastjetAll;   //!
    TBranch        *b_GenElectrons;   //!
    TBranch        *b_GenElectrons_fromTau;   //!
    TBranch        *b_GenElectrons_MT2Activity;   //!
@@ -333,7 +342,6 @@ class NtupleVariables : public TSelector {
    TBranch        *b_GenParticles_ParentIdx;   //!
    TBranch        *b_GenParticles_PdgId;   //!
    TBranch        *b_GenParticles_Status;   //!
-   TBranch        *b_GenParticles_TTFlag;   //!
    TBranch        *b_GenTaus;   //!
    TBranch        *b_GenTaus_had;   //!
    TBranch        *b_GenTaus_LeadRecoTrkAct;   //!
@@ -469,6 +477,9 @@ class NtupleVariables : public TSelector {
    TBranch        *b_NJetsJERdown;   //!
    TBranch        *b_NJetsJERup;   //!
    TBranch        *b_NMuons;   //!
+   TBranch        *b_NonPrefiringProb;   //!
+   TBranch        *b_NonPrefiringProbDown;   //!
+   TBranch        *b_NonPrefiringProbUp;   //!
    TBranch        *b_NumEvents;   //!
    TBranch        *b_NumInteractions;   //!
    TBranch        *b_NVtx;   //!
@@ -521,6 +532,7 @@ class NtupleVariables : public TSelector {
    TBranch        *b_TrueNumInteractions;   //!
    TBranch        *b_Weight;   //!
    TBranch        *b_ZCandidates;   //!
+   
    
  NtupleVariables(TTree * /*tree*/ =0) : fChain(0) { }
    ~NtupleVariables() { }
@@ -580,7 +592,6 @@ void NtupleVariables::Init(TTree *tree, string nameData)
    GenParticles_ParentIdx = 0;
    GenParticles_PdgId = 0;
    GenParticles_Status = 0;
-   GenParticles_TTFlag = 0;
    GenTaus = 0;
    GenTaus_had = 0;
    GenTaus_LeadRecoTrkAct = 0;
@@ -725,6 +736,8 @@ void NtupleVariables::Init(TTree *tree, string nameData)
    fChain->SetBranchAddress("CrossSection", &CrossSection, &b_CrossSection);
    fChain->SetBranchAddress("CSCTightHaloFilter", &CSCTightHaloFilter, &b_CSCTightHaloFilter);
    fChain->SetBranchAddress("ecalBadCalibFilter", &ecalBadCalibFilter, &b_ecalBadCalibFilter);
+   fChain->SetBranchAddress("ecalBadCalibReducedExtraFilter", &ecalBadCalibReducedExtraFilter, &b_ecalBadCalibReducedExtraFilter);
+   fChain->SetBranchAddress("ecalBadCalibReducedFilter", &ecalBadCalibReducedFilter, &b_ecalBadCalibReducedFilter);
    fChain->SetBranchAddress("EcalDeadCellTriggerPrimitiveFilter", &EcalDeadCellTriggerPrimitiveFilter, &b_EcalDeadCellTriggerPrimitiveFilter);
    fChain->SetBranchAddress("eeBadScFilter", &eeBadScFilter, &b_eeBadScFilter);
    fChain->SetBranchAddress("Electrons", &Electrons, &b_Electrons);
@@ -737,6 +750,7 @@ void NtupleVariables::Init(TTree *tree, string nameData)
    fChain->SetBranchAddress("Electrons_passIso", &Electrons_passIso, &b_Electrons_passIso);
    fChain->SetBranchAddress("Electrons_tightID", &Electrons_tightID, &b_Electrons_tightID);
    fChain->SetBranchAddress("Electrons_TrkEnergyCorr", &Electrons_TrkEnergyCorr, &b_Electrons_TrkEnergyCorr);
+   fChain->SetBranchAddress("fixedGridRhoFastjetAll", &fixedGridRhoFastjetAll, &b_fixedGridRhoFastjetAll);
    fChain->SetBranchAddress("GenElectrons", &GenElectrons, &b_GenElectrons);
    fChain->SetBranchAddress("GenElectrons_fromTau", &GenElectrons_fromTau, &b_GenElectrons_fromTau);
    fChain->SetBranchAddress("GenElectrons_MT2Activity", &GenElectrons_MT2Activity, &b_GenElectrons_MT2Activity);
@@ -762,7 +776,6 @@ void NtupleVariables::Init(TTree *tree, string nameData)
    fChain->SetBranchAddress("GenParticles_ParentIdx", &GenParticles_ParentIdx, &b_GenParticles_ParentIdx);
    fChain->SetBranchAddress("GenParticles_PdgId", &GenParticles_PdgId, &b_GenParticles_PdgId);
    fChain->SetBranchAddress("GenParticles_Status", &GenParticles_Status, &b_GenParticles_Status);
-   fChain->SetBranchAddress("GenParticles_TTFlag", &GenParticles_TTFlag, &b_GenParticles_TTFlag);
    fChain->SetBranchAddress("GenTaus", &GenTaus, &b_GenTaus);
    fChain->SetBranchAddress("GenTaus_had", &GenTaus_had, &b_GenTaus_had);
    fChain->SetBranchAddress("GenTaus_LeadRecoTrkAct", &GenTaus_LeadRecoTrkAct, &b_GenTaus_LeadRecoTrkAct);
@@ -898,6 +911,9 @@ void NtupleVariables::Init(TTree *tree, string nameData)
    fChain->SetBranchAddress("NJetsJERdown", &NJetsJERdown, &b_NJetsJERdown);
    fChain->SetBranchAddress("NJetsJERup", &NJetsJERup, &b_NJetsJERup);
    fChain->SetBranchAddress("NMuons", &NMuons, &b_NMuons);
+   fChain->SetBranchAddress("NonPrefiringProb", &NonPrefiringProb, &b_NonPrefiringProb);
+   fChain->SetBranchAddress("NonPrefiringProbDown", &NonPrefiringProbDown, &b_NonPrefiringProbDown);
+   fChain->SetBranchAddress("NonPrefiringProbUp", &NonPrefiringProbUp, &b_NonPrefiringProbUp);
    fChain->SetBranchAddress("NumEvents", &NumEvents, &b_NumEvents);
    fChain->SetBranchAddress("NumInteractions", &NumInteractions, &b_NumInteractions);
    fChain->SetBranchAddress("NVtx", &NVtx, &b_NVtx);
@@ -950,6 +966,8 @@ void NtupleVariables::Init(TTree *tree, string nameData)
    fChain->SetBranchAddress("TrueNumInteractions", &TrueNumInteractions, &b_TrueNumInteractions);
    fChain->SetBranchAddress("Weight", &Weight, &b_Weight);
    fChain->SetBranchAddress("ZCandidates", &ZCandidates, &b_ZCandidates);
+
+   
    Notify();
 }
 

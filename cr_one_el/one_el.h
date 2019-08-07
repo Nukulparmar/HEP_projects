@@ -27,7 +27,7 @@ class one_el : public NtupleVariables{
   
   // Intialize histos here
 
-  TH1D *one_electron;
+  TH1D *one_electron,*one_el_2;
   TH1D *h_ht,*h_met,*h_lead_ph_pt,*h_njets,*h_el_size,*h_mu_size;
   TFile *oFile;
   
@@ -44,6 +44,7 @@ void one_el::BookHistogram(const char *outFileName) {
   // Define Histos here
 
   one_electron = new TH1D("one_el","exactly one electron in b-jets and njets bins",6,1,7);
+  one_el_2 = new TH1D("one_el_all","exactly one electron in all the bins",16,1,17);
   h_ht = new TH1D("h_ht","HT after all the preselection",700,0,7000);
   h_met = new TH1D("h_met","MET after all the preselection",200,0,2000);
   h_lead_ph_pt = new TH1D("h_lead_ph_pt","Leading p_{T}^{#gamma} after all the preselection",200,0,2000);

@@ -27,8 +27,9 @@ class lost_el : public NtupleVariables{
   
   // Intialize histos here
 
-  TH1D *ll;
-  TH1D *h_ht,*h_met,*h_lead_ph_pt,*h_njets,*h_el_size,*h_mu_size;
+  TH1D *ll,*ll_2;
+  TH1D *h_ht,*h_met,*h_lead_ph_pt,*h_njets,*h_el_size,*h_mu_size,*h_dr_el_ph_1,*h_dr_el_ph_2,*h_dr_el_ph_3;
+  TH1D *h_dr_ph_gen_el;
   TFile *oFile;
   
 };
@@ -44,12 +45,17 @@ void lost_el::BookHistogram(const char *outFileName) {
   // Define Histos here
 
   ll = new TH1D("ll_electron","lost electron in b-jets and njets bins",6,1,7);
+  ll_2 = new TH1D("ll_electron_all","lost electron in all the bins",16,1,17);
   h_ht = new TH1D("h_ht","HT after all the preselection",700,0,7000);
   h_met = new TH1D("h_met","MET after all the preselection",200,0,2000);
   h_lead_ph_pt = new TH1D("h_lead_ph_pt","Leading p_{T}^{#gamma} after all the preselection",200,0,2000);
   h_njets = new TH1D("h_njets","NJets after all the preselection",20,0,20);
   h_el_size = new TH1D("h_el_size","Number of Electron after all the preselection",5,0,5);
   h_mu_size = new TH1D("h_mu_size","Number of Muons after all the preselection",5,0,5);
+  h_dr_el_ph_1 = new TH1D("*h_dr_el_ph_1","dr between el and ph before any matching",100,0,5);
+  h_dr_el_ph_2 = new TH1D("*h_dr_el_ph_2","dr between el and ph after reco el and reco ph matching",100,0,5);
+  h_dr_el_ph_3 = new TH1D("*h_dr_el_ph_3","dr between el and ph after preselection cuts",100,0,5);
+  h_dr_ph_gen_el = new TH1D("*h_dr_ph_gen_el","dr between gen el and ph after veto cuts",100,0,5);
   
 }
 

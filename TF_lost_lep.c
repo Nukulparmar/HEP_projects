@@ -1,6 +1,8 @@
-void bk_in_sr_bins(char* input)
+void TF_lost_lep(char* input)
 {
   TFile *f1,*f2,*f3,*f4,*f5,*f6;
+
+  
   if(strcmp(input,"wgjets_lnu")==0)
     {
       f1 = new TFile("../../EHEP_Projects/Summer_2019/WGJets_to_Lnu/wgjets_lnu_fake_photon.root");
@@ -52,11 +54,13 @@ void bk_in_sr_bins(char* input)
     }
 
   else
-    { cout<<"please give a proper input";
+    { cout<<"please give a proper input"; return 0;
     }
-  
-  TH1D *ll_e,*ll_mu,*fake_photon,*had_tau,*one_el,*one_mu;
 
+
+  TH1D *ll_e,*ll_mu,*fake_photon,*had_tau,*one_el,*one_mu;
+  
+  
   TH1D *ll,*fake_photon_1,*had_tau_1,*one_lep;
   ll = new TH1D("ll","lost lepton",6,1,7);
   fake_photon_1 = new TH1D("fake_photon_1","fake photon",6,1,7);
@@ -70,7 +74,6 @@ void bk_in_sr_bins(char* input)
   one_el = (TH1D*)f5->Get("one_el");
   one_mu = (TH1D*)f6->Get("one_mu");
 
-  // TH1D *total;
   double temp=0,temp_one_lep=0,temp_lost_lep=0;
   const char* str[6] = {"NJets_{=0}^{2-4}","NJets_{#geq 1}^{2-4}","NJets_{=0}^{5-6}","NJets_{#geq 1}^{5-6}","NJets_{=0}^{#geq 7}","NJets_{#geq 1}^{#geq 7}"};
   
@@ -86,40 +89,40 @@ void bk_in_sr_bins(char* input)
     }
 
   THStack *stack = new THStack("Stack","stack hist");
-
   TCanvas *c1 = new TCanvas("stackhist","stackhist",1600,900);
+
+  
+  TPad *pad1 = new TPad("pad1","pad1",0,0.3,1,1);
+  pad1->SetBottomMargin(0);
+
+  TPad *pad2 = new TPad("pad1","pad1",0,0.0,1,0.3);
+  pad2->SetTopMargin(0);
+  pad2->SetBottomMargin(0.3);
+  pad1->Draw();pad1->SetGridx();
+  pad2->Draw();pad2->SetGridx();pad2->SetGridy();
+  pad1->cd();
   
   gStyle->SetPalette(kOcean);
-
   ll->SetFillColor(kOrange+3);
   fake_photon_1->SetFillColor(kBlue-9);
   had_tau_1->SetFillColor(kGray);
   one_lep->SetFillColor(kYellow);
-
-  TLegend *legend = new TLegend(0.55,0.7,0.9,0.9);
-
+  
+  TLegend *legend = new TLegend(0.7,0.7,0.9,0.9);
   stack->Add(one_lep);
   stack->Add(ll);
   stack->Add(had_tau_1);
   stack->Add(fake_photon_1);
-  
-
   stack->Draw("hist");
-
   legend->SetNColumns(2);
-  legend->SetBorderSize(0);
+  legend->SetBorderSize(1);
 
-  stack->GetXaxis()->SetTitleSize(0.045);
-  stack->GetXaxis()->SetLabelSize(0.045);
-  stack->GetXaxis()->SetTitleOffset(0.88);
-  stack->GetXaxis()->SetTitle("Bin Number");
-  //stack->GetXaxis()->SetGridStyle(1);
-  
   stack->GetYaxis()->SetTitleSize(0.05);
   stack->GetYaxis()->SetTitleOffset(0.85);
-  stack->GetYaxis()->SetLabelSize(0.05);
+  stack->GetYaxis()->SetLabelSize(0.07);
   stack->GetYaxis()->SetTitle(0);
-  stack->GetYaxis()->SetRange(0,2);
+  stack->GetYaxis()->SetRangeUser(0,2);
+  
   stack->SetTitle(input);
 
 
@@ -127,14 +130,36 @@ void bk_in_sr_bins(char* input)
   legend->AddEntry(ll,"lost lepton","f");
   legend->AddEntry(fake_photon_1,"Fake photon","f");
   legend->AddEntry(had_tau_1,"hadronic #tau","f");
-  legend->SetTextSize(0.02);
+  legend->SetTextSize(0.03);
   legend->Draw();
 
-  TArrow *arrow1 = new TArrow(0.5,1300,6.5,1300,0.01,"<|>");
-  arrow1->Draw("");
 
-  TLatex T1;
-  T1.SetTextSize(0.08);
-  T1.DrawLatex(3.0,2000,"N^{0}_{2-4}");
+  pad2->cd();
+
+  TH1D *TF = new TH1D("tf","Transfer factor",6,1,7);
+  for(int i=1;i<=6;i++)
+    { TF->GetXaxis()->SetBinLabel(i,str[i-1]);}
+  TF->Add(ll);
+  //TF->Add(fake_photon_1);
+  TF->Add(had_tau_1);
+  TF->GetYaxis()->SetRangeUser(0,2);
+  TF->Sumw2();
+  TF->SetStats(0);
+  TF->Divide(one_lep);
+  TF->Draw("ep");
+  TF->SetTitle(0);
+
+  TF->GetXaxis()->SetTitle(0);
+  TF->GetXaxis()->SetLabelSize(0.16);
+
+  TF->GetYaxis()->SetTitle("Transfer factor");
+  TF->GetYaxis()->SetTitleOffset(0.35);
+  TF->GetYaxis()->SetTitleSize(0.13);
+  TF->GetYaxis()->SetLabelSize(0.09);
+  TF->SetLineWidth(3);
+  //TF->SetMaximum(1.99);
+  //TF->SetMinimum(0.01);
+  
   
 }
+

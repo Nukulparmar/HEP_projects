@@ -27,7 +27,7 @@ class one_mu : public NtupleVariables{
   
   // Intialize histos here
 
-  TH1D *one_muon;
+  TH1D *one_muon,*one_mu_2;
   TH1D *h_ht,*h_met,*h_lead_ph_pt,*h_njets,*h_el_size,*h_mu_size;
   
   TFile *oFile;
@@ -44,7 +44,8 @@ void one_mu::BookHistogram(const char *outFileName) {
   oFile = new TFile(outFileName, "recreate");
   // Define Histos here
 
-  one_muon = new TH1D("one_mu","exactly one electron in b-jets and njets bins",6,1,7);
+  one_muon = new TH1D("one_mu","exactly one muon in b-jets and njets bins",6,1,7);
+  one_mu_2 = new TH1D("one_mu_all","exactly one muon in all the bins",16,1,17);
   h_ht = new TH1D("h_ht","HT after all the preselection",700,0,7000);
   h_met = new TH1D("h_met","MET after all the preselection",200,0,2000);
   h_lead_ph_pt = new TH1D("h_lead_ph_pt","Leading p_{T}^{#gamma} after all the preselection",200,0,2000);

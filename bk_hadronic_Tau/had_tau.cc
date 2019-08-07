@@ -81,7 +81,7 @@ void had_tau::EventLoop(const char *data,const char *inputFileList)
 	{goodphoton = goodphotons[0];}
 
       if(goodphoton.Pt()<100) continue; // remove events with 0 photons or pt<100
-      // if(electron_match_photon(goodphoton)) continue; // don't care as electron is rejected
+      if(electron_match_photon(goodphoton)) continue; // don't care as electron is rejected
       if(Muons->size()>0) continue; // veto muons
       if(Electrons->size()>0) continue; //  no reco electrons
       if(isoMuonTracks!=0 || isoPionTracks!=0 || isoElectronTracks!=0) continue;
@@ -224,34 +224,100 @@ void had_tau::EventLoop(const char *data,const char *inputFileList)
 	  h_el_size->Fill(Electrons->size(),wt);
 	  h_mu_size->Fill(Muons->size(),wt);
 
+	  hadtau->Fill("NJets_{=0}^{2-4}",0);
+	  hadtau->Fill("NJets_{#geq 1}^{2-4}",0);
+	  hadtau->Fill("NJets_{=0}^{5-6}",0);
+	  hadtau->Fill("NJets_{#geq 1}^{5-6}",0);
+	  hadtau->Fill("NJets_{=0}^{#geq 7}",0);
+	  hadtau->Fill("NJets_{#geq 1}^{#geq 7}",0);
+
+	  int njets = goodjets.size();
+
+	  hadtau_2->Fill("NJets_{0}^{=2} & 100<MET<150",0);
+	  hadtau_2->Fill("NJets_{0}^{=2} & MET#geq 150",0);
+	  hadtau_2->Fill("NJets_{0}^{=3} & 100<MET<150",0);
+	  hadtau_2->Fill("NJets_{0}^{=3} & MET#geq 150",0);
+	  hadtau_2->Fill("NJets_{0}^{=4} & 100<MET<150",0);
+	  hadtau_2->Fill("NJets_{0}^{=4} & MET#geq 150",0);
+	  hadtau_2->Fill("NJets_{0}^{5-6} & 100<MET<150",0);
+	  hadtau_2->Fill("NJets_{0}^{5-6} & MET#geq 150",0);
+	  hadtau_2->Fill("NJets_{0}^{#geq7} & 100<MET<150",0);
+	  hadtau_2->Fill("NJets_{0}^{#geq7} & MET#geq 150",0);
+	  hadtau_2->Fill("NJets_{#geq 1}^{2-4} & 100<MET<150",0);
+	  hadtau_2->Fill("NJets_{#geq 1}^{2-4} & MET#geq 150",0);
+	  hadtau_2->Fill("NJets_{#geq 1}^{5-6} & 100<MET<150",0);
+	  hadtau_2->Fill("NJets_{#geq 1}^{5-6} & MET#geq 150",0);
+	  hadtau_2->Fill("NJets_{#geq 1}^{#geq 7} & 100<MET<150",0);
+	  hadtau_2->Fill("NJets_{#geq 1}^{#geq 7} & MET#geq 150",0);
 	  
 	  if(BTags==0)
 	    { if(goodjets.size()>=2 && goodjets.size()<=4)
 		{		  
-		  hadtau->Fill(1,1);
+		  hadtau->Fill("NJets_{=0}^{2-4}",1);
+		  if(njets==2)
+		    {
+		      if(MET>=100 && MET<150)
+			{ hadtau_2->Fill("NJets_{0}^{=2} & 100<MET<150",1);}
+		      if(MET>=150)
+			{ hadtau_2->Fill("NJets_{0}^{=2} & MET#geq 150",1);}
+		    }
+		  if(njets==3)
+		    {
+		      if(MET>=100 && MET<150)
+			{ hadtau_2->Fill("NJets_{0}^{=3} & 100<MET<150",1);}
+		      if(MET>=150)
+			{ hadtau_2->Fill("NJets_{0}^{=3} & MET#geq 150",1);}
+		    }
+		  if(njets==4)
+		    {
+		      if(MET>=100 && MET<150)
+			{ hadtau_2->Fill("NJets_{0}^{=4} & 100<MET<150",1);}
+		      if(MET>=150)
+			{ hadtau_2->Fill("NJets_{0}^{=4} & MET#geq 150",1);}
+		    }
 		}
 	      if(goodjets.size()>=5 && goodjets.size()<=6)
 		{
-		  hadtau->Fill(3,1);
+		  hadtau->Fill("NJets_{=0}^{5-6}",1);
+		  if(MET>=100 && MET<150)
+		    { hadtau_2->Fill("NJets_{0}^{5-6} & 100<MET<150",1);}
+		  if(MET>=150)
+		    { hadtau_2->Fill("NJets_{0}^{5-6} & MET#geq 150",1);}
 		}
 	      if(goodjets.size()>=7)
 		{
-		  hadtau->Fill(5,1);
+		  hadtau->Fill("NJets_{=0}^{#geq 7}",1);
+		  if(MET>=100 && MET<150)
+		    { hadtau_2->Fill("NJets_{0}^{#geq7} & 100<MET<150",1);}
+		  if(MET>=150)
+		    { hadtau_2->Fill("NJets_{0}^{#geq7} & MET#geq 150",1);}
 		}
 
 	    }
 	  if(BTags>=1)
 	    { if(goodjets.size()>=2 && goodjets.size()<=4)
 		{
-		  hadtau->Fill(2,1);
+		  hadtau->Fill("NJets_{#geq 1}^{2-4}",1);
+		  if(MET>=100 && MET<150)
+		    { hadtau_2->Fill("NJets_{#geq 1}^{2-4} & 100<MET<150",1);}
+		  if(MET>=150)
+		    { hadtau_2->Fill("NJets_{#geq 1}^{2-4} & MET#geq 150",1);}
 		}
 	      if(goodjets.size()>=5 && goodjets.size()<=6)
 		{
-		  hadtau->Fill(4,1);
+		  hadtau->Fill("NJets_{#geq 1}^{5-6}",1);
+		  if(MET>=100 && MET<150)
+		    { hadtau_2->Fill("NJets_{#geq 1}^{5-6} & 100<MET<150",1);}
+		  if(MET>=150)
+		    { hadtau_2->Fill("NJets_{#geq 1}^{5-6} & MET#geq 150",1);}
 		}
 	      if(goodjets.size()>=7)
 		{
-		  hadtau->Fill(6,1);
+		  hadtau->Fill("NJets_{#geq 1}^{#geq 7}",1);
+		  if(MET>=100 && MET<150)
+		    { hadtau_2->Fill("NJets_{#geq 1}^{#geq 7} & 100<MET<150",1);}
+		  if(MET>=150)
+		    { hadtau_2->Fill("NJets_{#geq 1}^{#geq 7} & MET#geq 150",1);}
 		}
 	      
 	    }	

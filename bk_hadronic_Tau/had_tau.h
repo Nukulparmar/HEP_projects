@@ -27,7 +27,7 @@ class had_tau : public NtupleVariables{
   
   // Intialize histos here
 
-  TH1D *hadtau;
+  TH1D *hadtau,*hadtau_2;
   TH1D *h_ht,*h_met,*h_lead_ph_pt,*h_njets,*h_el_size,*h_mu_size;
   TFile *oFile;
   
@@ -50,6 +50,7 @@ void had_tau::BookHistogram(const char *outFileName) {
   h_njets = new TH1D("h_njets","NJets after all the preselection",20,0,20);
   h_el_size = new TH1D("h_el_size","Number of Electron after all the preselection",5,0,5);
   h_mu_size = new TH1D("h_mu_size","Number of Muons after all the preselection",5,0,5);
+  hadtau_2 = new TH1D("had_tau_all","hadronic tau in all the bins ",16,1,17);
   
 }
 

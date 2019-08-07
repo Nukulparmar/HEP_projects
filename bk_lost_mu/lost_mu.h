@@ -27,7 +27,7 @@ class lost_mu : public NtupleVariables{
   
   // Intialize histos here
 
-  TH1D *ll_mu;
+  TH1D *ll_mu,*ll_mu_2;
   TH1D *h_ht,*h_met,*h_lead_ph_pt,*h_njets,*h_el_size,*h_mu_size;
   TFile *oFile;
   
@@ -44,6 +44,7 @@ void lost_mu::BookHistogram(const char *outFileName) {
   // Define Histos here
 
   ll_mu = new TH1D("ll_mu","lost mu in b-jets and njets bins",6,1,7);
+  ll_mu_2 = new TH1D("ll_mu_all","lost mu in all the bins",16,1,17);
   h_ht = new TH1D("h_ht","HT after all the preselection",700,0,7000);
   h_met = new TH1D("h_met","MET after all the preselection",200,0,2000);
   h_lead_ph_pt = new TH1D("h_lead_ph_pt","Leading p_{T}^{#gamma} after all the preselection",200,0,2000);

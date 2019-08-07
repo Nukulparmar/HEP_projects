@@ -81,10 +81,10 @@ void one_el::EventLoop(const char *data,const char *inputFileList)
 	{goodphoton = goodphotons[0];}
 
       if(goodphoton.Pt()<100) continue; // remove events with 0 photons or pt<100
-      if(electron_match_photon(goodphoton)) continue; // don't want electron matched to good photon
+      //if(electron_match_photon(goodphoton)) continue; // don't want electron matched to good photon
 
-      if(Muons->size()>0) continue; // veto muons
-      if(Electrons->size()!=1) continue;  // 1 reco electrons events will pass this cut
+      if(NMuons>0) continue; // veto muons
+      if(NElectrons!=1) continue;  // 1 reco electrons events will pass this cut
       if(isoMuonTracks!=0 || isoPionTracks!=0) continue;
 
       double mt_ele=0,mt_pho=0,mt_elepho=0;
@@ -232,34 +232,101 @@ void one_el::EventLoop(const char *data,const char *inputFileList)
 	  h_el_size->Fill(Electrons->size(),wt);
 	  h_mu_size->Fill(Muons->size(),wt);
 
+	  one_electron->Fill("NJets_{=0}^{2-4}",0);
+	  one_electron->Fill("NJets_{#geq 1}^{2-4}",0);
+	  one_electron->Fill("NJets_{=0}^{5-6}",0);
+	  one_electron->Fill("NJets_{#geq 1}^{5-6}",0);
+	  one_electron->Fill("NJets_{=0}^{#geq 7}",0);
+	  one_electron->Fill("NJets_{#geq 1}^{#geq 7}",0);
+
+	  int njets = goodjets.size();
+
+	  one_el_2->Fill("NJets_{0}^{=2} & 100<MET<150",0);
+	  one_el_2->Fill("NJets_{0}^{=2} & MET#geq 150",0);
+	  one_el_2->Fill("NJets_{0}^{=3} & 100<MET<150",0);
+	  one_el_2->Fill("NJets_{0}^{=3} & MET#geq 150",0);
+	  one_el_2->Fill("NJets_{0}^{=4} & 100<MET<150",0);
+	  one_el_2->Fill("NJets_{0}^{=4} & MET#geq 150",0);
+	  one_el_2->Fill("NJets_{0}^{5-6} & 100<MET<150",0);
+	  one_el_2->Fill("NJets_{0}^{5-6} & MET#geq 150",0);
+	  one_el_2->Fill("NJets_{0}^{#geq7} & 100<MET<150",0);
+	  one_el_2->Fill("NJets_{0}^{#geq7} & MET#geq 150",0);
+	  one_el_2->Fill("NJets_{#geq 1}^{2-4} & 100<MET<150",0);
+	  one_el_2->Fill("NJets_{#geq 1}^{2-4} & MET#geq 150",0);
+	  one_el_2->Fill("NJets_{#geq 1}^{5-6} & 100<MET<150",0);
+	  one_el_2->Fill("NJets_{#geq 1}^{5-6} & MET#geq 150",0);
+	  one_el_2->Fill("NJets_{#geq 1}^{#geq 7} & 100<MET<150",0);
+	  one_el_2->Fill("NJets_{#geq 1}^{#geq 7} & MET#geq 150",0);
+	  	    
 	  
 	  if(BTags==0)
 	    { if(goodjets.size()>=2 && goodjets.size()<=4)
 		{		  
-		  one_electron->Fill(1,1);
+		  one_electron->Fill("NJets_{=0}^{2-4}",1);
+		  if(njets==2)
+		    {
+		      if(MET>=100 && MET<150)
+			{ one_el_2->Fill("NJets_{0}^{=2} & 100<MET<150",1);}
+		      if(MET>=150)
+			{ one_el_2->Fill("NJets_{0}^{=2} & MET#geq 150",1);}
+		    }
+		  if(njets==3)
+		    {
+		      if(MET>=100 && MET<150)
+			{ one_el_2->Fill("NJets_{0}^{=3} & 100<MET<150",1);}
+		      if(MET>=150)
+			{ one_el_2->Fill("NJets_{0}^{=3} & MET#geq 150",1);}
+		    }
+		  if(njets==4)
+		    {
+		      if(MET>=100 && MET<150)
+			{ one_el_2->Fill("NJets_{0}^{=4} & 100<MET<150",1);}
+		      if(MET>=150)
+			{ one_el_2->Fill("NJets_{0}^{=4} & MET#geq 150",1);}
+		    }
 		}
 	      if(goodjets.size()>=5 && goodjets.size()<=6)
 		{
-		  one_electron->Fill(3,1);
+		  one_electron->Fill("NJets_{=0}^{5-6}",1);
+		  if(MET>=100 && MET<150)
+		    { one_el_2->Fill("NJets_{0}^{5-6} & 100<MET<150",1);}
+		  if(MET>=150)
+		    { one_el_2->Fill("NJets_{0}^{5-6} & MET#geq 150",1);}
 		}
 	      if(goodjets.size()>=7)
 		{
-		  one_electron->Fill(5,1);
+		  one_electron->Fill("NJets_{=0}^{#geq 7}",1);
+		  if(MET>=100 && MET<150)
+		    { one_el_2->Fill("NJets_{0}^{#geq7} & 100<MET<150",1);}
+		  if(MET>=150)
+		    { one_el_2->Fill("NJets_{0}^{#geq7} & MET#geq 150",1);}
 		}
 
 	    }
 	  if(BTags>=1)
 	    { if(goodjets.size()>=2 && goodjets.size()<=4)
 		{
-		  one_electron->Fill(2,1);
+		  one_electron->Fill("NJets_{#geq 1}^{2-4}",1);
+		  if(MET>=100 && MET<150)
+		    { one_el_2->Fill("NJets_{#geq 1}^{2-4} & 100<MET<150",1);}
+		  if(MET>=150)
+		    { one_el_2->Fill("NJets_{#geq 1}^{2-4} & MET#geq 150",1);}
 		}
 	      if(goodjets.size()>=5 && goodjets.size()<=6)
 		{
-		  one_electron->Fill(4,1);
+		  one_electron->Fill("NJets_{#geq 1}^{5-6}",1);
+		  if(MET>=100 && MET<150)
+		    { one_el_2->Fill("NJets_{#geq 1}^{5-6} & 100<MET<150",1);}
+		  if(MET>=150)
+		    { one_el_2->Fill("NJets_{#geq 1}^{5-6} & MET#geq 150",1);}
 		}
 	      if(goodjets.size()>=7)
 		{
-		  one_electron->Fill(6,1);
+		  one_electron->Fill("NJets_{#geq 1}^{#geq 7}",1);
+		  if(MET>=100 && MET<150)
+		    { one_el_2->Fill("NJets_{#geq 1}^{#geq 7} & 100<MET<150",1);}
+		  if(MET>=150)
+		    { one_el_2->Fill("NJets_{#geq 1}^{#geq 7} & MET#geq 150",1);}
 		}
 	      
 	    }	

@@ -230,15 +230,15 @@ void lost_el::EventLoop(const char *data,const char *inputFileList)
       
       bool acceptance = true;
       for(int i=0;i<gen_el.size();i++)
-	{ if((abs(gen_el[i].Eta())>2.5)||(gen_el[i].Pt()<=10))
-	    { not_accepted+=1;
-	      fill_hist(fail_accept1,fail_accept2,BTags,MET,goodjets.size(),wt);
-	      acceptance =false;
-	    }
-	}
+      	{ if((abs(gen_el[i].Eta())>2.5)||(gen_el[i].Pt()<=10))
+      	    { not_accepted+=1;
+      	      fill_hist(fail_accept1,fail_accept2,BTags,MET,goodjets.size(),wt);
+      	      acceptance =false;
+      	    }
+      	}
       check+=1;
       if(!acceptance) continue;
-      ////////////////////////////////////////////////////////////////////
+      
       survived_accept+=1;
       nel[2]->Fill(NElectrons,wt);
       nmu[2]->Fill(NMuons,wt);
@@ -246,7 +246,7 @@ void lost_el::EventLoop(const char *data,const char *inputFileList)
       gen_mu_size[1]->Fill(gen_mu.size(),wt);
       gen_ph_size[1]->Fill(gen_ph.size(),wt);
       
-
+      
 
       // Failed Id  ////////////////////////////////////////////////
 
@@ -254,7 +254,7 @@ void lost_el::EventLoop(const char *data,const char *inputFileList)
       // for(int i=0;i<gen_el.size();i++)
       // 	{ if(
 
-
+      
 
       ////////////////////////////////////////////////////////////
       survived_failed_id+=1;
@@ -263,20 +263,21 @@ void lost_el::EventLoop(const char *data,const char *inputFileList)
       gen_el_size[2]->Fill(gen_el.size(),wt);
       gen_mu_size[2]->Fill(gen_mu.size(),wt);
       gen_ph_size[2]->Fill(gen_ph.size(),wt);
-
-
+      
+      
 
       //   Failed Iso ///////////////////////////////////////////
-
-      bool iso= true;
-      if(NElectrons == 0 || NMuons == 0)
-	{ fill_hist(fail_iso1,fail_iso2,BTags,MET,goodjets.size(),wt);
-	  iso = false;
-	}
-      if(!iso) continue;
-
-
-
+      
+      bool isol= true;
+      if(NElectrons == 0)
+      	{ 
+      	  fill_hist(fail_iso1,fail_iso2,BTags,MET,goodjets.size(),wt);
+      	  isol = false;
+      	}
+      
+      if(!isol) continue;
+      
+      
       /////////////////////////////////////////////////////////
       survived_failed_iso+=1;
       nel[4]->Fill(NElectrons,wt);
@@ -284,15 +285,14 @@ void lost_el::EventLoop(const char *data,const char *inputFileList)
       gen_el_size[3]->Fill(gen_el.size(),wt);
       gen_mu_size[3]->Fill(gen_mu.size(),wt);
       gen_ph_size[3]->Fill(gen_ph.size(),wt);
-
       // 1 Lepton CR ///////////////////////////////////////////
       bool cr = true;
-      if(NElectrons == 1 || NMuons == 1)
-	{ fill_hist(one_lep_cr1,one_lep_cr2,BTags,MET,goodjets.size(),wt);
-	  cr = false;
-	}
+      if(NElectrons == 1)
+      	{ events_cr+=1;
+	  fill_hist(one_lep_cr1,one_lep_cr2,BTags,MET,goodjets.size(),wt);
+      	  cr = false;
+      	}
       if(!cr) continue;
-
 
       /////////////////////////////////////////////////////////
       survived_all+=1;
@@ -303,7 +303,7 @@ void lost_el::EventLoop(const char *data,const char *inputFileList)
       gen_ph_size[4]->Fill(gen_ph.size(),wt);
       
     }// loop over entries
-
+  
   cout<<"Events survived preselection =         "<<survived_events<<endl;
   cout<<"Events survived veto had =             "<<survived_vetohad<<endl;
   cout<<"Events not accepted by the detector =  "<<not_accepted<<endl;

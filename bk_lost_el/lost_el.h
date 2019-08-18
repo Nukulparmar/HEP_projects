@@ -28,7 +28,7 @@ class lost_el : public NtupleVariables{
   
   // Intialize histos here
 
-  TH1D *total1,*total2,*fail_accept1,*fail_accept2;
+  TH1D *total1,*total2,*fail_accept1,*fail_accept2,*fail_iso1,*fail_iso2,*one_lep_cr1,*one_lep_cr2;
   TH1D *h_st,*h_met,*h_lead_ph_pt[2],*h_lead_ph_eta[2],*h_njets,*h_el_size[2],*h_mu_size[2],*h_el_pt[2],*h_el_eta[2],*h_mu_pt[2],*h_mu_eta[2];
   TH1D *gen_el_pt,*gen_el_size[5],*gen_el_eta,*gen_mu_pt,*gen_mu_eta,*gen_mu_size[5],*gen_tau_size;
   TH1D *gen_ph_pt,*gen_ph_size[5],*gen_ph_eta;
@@ -49,7 +49,12 @@ void lost_el::BookHistogram(const char *outFileName) {
   total1 = new TH1D("total1","lost electron in b-jets and njets bins",6,1,7);
   total2 = new TH1D("total2","lost electron in all the bins",16,1,17);
   fail_accept1 = new TH1D("fail_accept_1","Fail Acceptance in b-jets and njets bins",6,1,7);
-  fail_accept2 = new TH1D("fail_accept2","Fail Acceptance in all the bins",16,1,17);
+  fail_accept2 = new TH1D("fail_accept_2","Fail Acceptance in all the bins",16,1,17);
+  fail_iso1 = new TH1D("fail_iso_1","Fail Iso in b-jets and njets bins",6,1,7);
+  fail_iso2 = new TH1D("fail_iso_2","Fail Iso in all the bins",16,1,17);
+  one_lep_cr1 = new TH1D("one_lep_cr_1","1 lep cr in b-jets and njets bins",6,1,7);
+  one_lep_cr2 = new TH1D("one_lep_cr_2","1 lep cr in all the bins",16,1,17);
+  
   
   h_st = new TH1D("h_ht","HT after all the preselection",700,0,7000);
   h_met = new TH1D("h_met","MET after all the preselection",200,0,2000);
@@ -74,11 +79,11 @@ void lost_el::BookHistogram(const char *outFileName) {
   nel[5] = new TH1D("nel_5","NElectron after all",5,0,5);
 
   nmu[0] = new TH1D("nmu_0","Nmuon after preselection",5,0,5);
-  nmu[1] = new TH1D("nmu_1","Nmuonn after veto gen hadronic",5,0,5);
-  nmu[2] = new TH1D("nmu_2","Nmuonn after fail acceptance",5,0,5);
-  nmu[2] = new TH1D("nmu_2","Nmuonn after fail Id",5,0,5);
-  nmu[2] = new TH1D("nmu_2","Nmuonn after fail Iso",5,0,5);
-  nmu[2] = new TH1D("nmu_2","Nmuonn after all",5,0,5);
+  nmu[1] = new TH1D("nmu_1","Nmuon after veto gen hadronic",5,0,5);
+  nmu[2] = new TH1D("nmu_2","Nmuon after fail acceptance",5,0,5);
+  nmu[3] = new TH1D("nmu_3","Nmuon after fail Id",5,0,5);
+  nmu[4] = new TH1D("nmu_4","Nmuon after fail Iso",5,0,5);
+  nmu[5] = new TH1D("nmu_5","Nmuon after all",5,0,5);
   
   h_mu_size[0] = new TH1D("h_mu_size0","Number of Muons after all the preselection",5,0,5);
   h_mu_pt[0] = new TH1D("h_mu_pt0","Reco #mu pt after preselection",200,0,1600);

@@ -79,9 +79,9 @@ void TF_lost_lep(char* input)
   
   for(int i=1;i<=6;i++)
     { temp_one_lep = one_el->GetBinContent(i)+one_mu->GetBinContent(i);
-      temp_lost_lep = ll_mu->GetBinContent(i) + ll_e->GetBinContent(i);
+      temp_lost_lep = ll_mu->GetBinContent(i) /*+ ll_e->GetBinContent(i)*/;
       temp = fake_photon->GetBinContent(i)+had_tau->GetBinContent(i)+temp_one_lep+temp_lost_lep;
-      cout<<"temp = "<<temp<<" temp_one_lep = "<<temp_one_lep<<" temp_lost_lep = "<<temp_lost_lep<<endl;
+      cout<<"temp = "<<temp<<" temp_one_lep = "<<temp_one_lep<<" temp_lost_lep = "<<temp_lost_lep<<" lost_el = "<<ll_e->GetBinContent(i)<<" lost mu = "<<ll_mu->GetBinContent(i)<<endl;
       ll->Fill(str[i-1],temp_lost_lep/temp);
       fake_photon_1->Fill(str[i-1],fake_photon->GetBinContent(i)/temp);
       had_tau_1->Fill(str[i-1],had_tau->GetBinContent(i)/temp);

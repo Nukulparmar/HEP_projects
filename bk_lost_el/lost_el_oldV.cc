@@ -1,5 +1,5 @@
-#define lost_mu_cxx
-#include "lost_mu.h"
+#define lost_el_cxx
+#include "lost_el.h"
 #include <TH2.h>
 #include <TStyle.h>
 #include <TCanvas.h>
@@ -25,7 +25,7 @@ int main(int argc, char* argv[])
   const char *outFileName   = argv[2];
   const char *data          = argv[3];
 
-  lost_mu ana(inputFileList, outFileName, data);
+  lost_el ana(inputFileList, outFileName, data);
   cout << "dataset " << data << " " << endl;
 
   ana.EventLoop(data,inputFileList);
@@ -33,7 +33,7 @@ int main(int argc, char* argv[])
   return 0;
 }
 
-void lost_mu::EventLoop(const char *data,const char *inputFileList)
+void lost_el::EventLoop(const char *data,const char *inputFileList)
 { 
   if (fChain == 0) return;
 
@@ -81,22 +81,27 @@ void lost_mu::EventLoop(const char *data,const char *inputFileList)
 	{goodphoton = goodphotons[0];}
 
       if(goodphoton.Pt()<100) continue; // remove events with 0 photons or pt<100
+      for(int i=0;i<Electrons->size();i++)
+	{	  h_dr_el_ph_1->Fill(goodphoton.DeltaR((*Electrons)[i]),wt);         }
+	    
+	    
       if(electron_match_photon(goodphoton)) continue; // don't want electron matched to good photon
+      for(int i=0;i<Electrons->size();i++)
+	{	  h_dr_el_ph_2->Fill(goodphoton.DeltaR((*Electrons)[i]),wt);         }
 
-      if(Electrons->size()>0) continue; // veto muons
-      if(Muons->size()>1) continue; // 1 or no(lost) reco electrons
-      if(isoElectronTracks!=0 || isoPionTracks!=0) continue;
+      
+      if(Muons->size()>0) continue; // veto muons
+      if(Electrons->size()>1) continue; // 1 or no(lost) reco electrons
+      if(isoMuonTracks!=0 || isoPionTracks!=0) continue;
 
-      double mt_mu=0,mt_pho=0,mt_mupho=0;
-      if(Muons->size()==1){
-	mt_mu=sqrt(2*(*Muons)[0].Pt()*MET*(1-cos(DeltaPhi(METPhi,(*Muons)[0].Phi()))));
-	if(mt_mu>100) continue;
-	if( ((*Muons)[0].Pt() < 10) || abs((*Muons)[0].Eta()) > 2.4 ) continue;
-	
+      double mt_ele=0,mt_pho=0,mt_elepho=0;
+      if(Electrons->size()==1){
+	mt_ele=sqrt(2*(*Electrons)[0].Pt()*MET*(1-cos(DeltaPhi(METPhi,(*Electrons)[0].Phi()))));
+	if(mt_ele>100) continue;
+	if( ((*Electrons)[0].Pt() < 10) || abs((*Electrons)[0].Eta()) > 2.5 ) continue;
       }
       mt_pho=sqrt(2*goodphoton.Pt()*MET*(1-cos(DeltaPhi(METPhi,goodphoton.Phi()))));
-      if(Muons->size()==1) mt_mupho=sqrt(2*(goodphoton+(*Muons)[0]).Pt()*MET*(1-cos(DeltaPhi(METPhi,(goodphoton+(*Muons)[0]).Phi()))));
-      
+      if(Electrons->size()==1) mt_elepho=sqrt(2*(goodphoton+(*Electrons)[0]).Pt()*MET*(1-cos(DeltaPhi(METPhi,(goodphoton+(*Electrons)[0]).Phi()))));   // MHT cut defined in the paper for isolated tracks
 
 
       vector<TLorentzVector> goodjets;
@@ -136,7 +141,7 @@ void lost_mu::EventLoop(const char *data,const char *inputFileList)
 
       // ----------------------  Gen level -------------------------
       vector<TLorentzVector> gen_el, gen_mu,gen_tau,gen_tau_el,gen_tau_mu;
-      
+     
       for(int i=0;i<GenParticles->size();i++)
 	{ if((*GenParticles)[i].Pt()!=0)
 	    {
@@ -162,56 +167,80 @@ void lost_mu::EventLoop(const char *data,const char *inputFileList)
 
       if(gen_el.size()==0 && gen_mu.size()==0 && gen_tau.size()==0) continue; // rejecting hadronic decays
 
-      if(Muons->size()==0)
+      if(Electrons->size()==0)
 	{
 	  if(isoMuonTracks!=0 || isoElectronTracks!=0 || isoPionTracks!=0) continue;
-	  if(gen_mu.size()==0) continue;
-	  //if(gen_el.size()!=0) continue;
+	  if(gen_el.size()==0) continue;
+	  // if(gen_mu.size()!=0) continue;
 	}
-      if(gen_el.size()!=0) continue; // no di-leptonic events are considered as our control region is 1 Lepton, so there should be exactly 1 gen Muon and no gen electron. 
-      
+      if(gen_mu.size()!=0) continue; // rejecting all events with gen muons
+      sortTLorVec(&gen_el);
 
-      // checking if the photon is real or fake ( Not needed in lost muon case as we are rejecting all the gen electron events
+      // checking if the photon is real or fake
 
-      // bool realphoton = true;
-      // int match_el,match_p=0;
-      // double mindr_ph_genobj = 100,match_el_pt=0.0,match_ph_pt=0.0;
-      // for(int i=0;i<GenParticles->size();i++)
-      // 	{ if((*GenParticles)[i].Pt()!=0)
-      // 	    { double dr1=goodphoton.DeltaR((*GenParticles)[i]);
-      // 	      if(dr1<0.2 && abs((*GenParticles_PdgId)[i])==11 && abs((*GenParticles_ParentId)[i])<=24)
-      // 		{ match_el=1;
-      // 		  match_el_pt=(*GenParticles)[i].Pt();
-      // 		}
-      // 	      if(mindr_ph_genobj > dr1) { mindr_ph_genobj = dr1;}
-      // 	    }
-      // 	}
+      bool realphoton = true;
+      int match_el=0,match_p=0;
+      double mindr_ph_genobj = 100,match_el_pt=0.0,match_ph_pt=0.0;
+      for(int i=0;i<GenParticles->size();i++)
+	{ if((*GenParticles)[i].Pt()!=0)
+	    { double dr1=goodphoton.DeltaR((*GenParticles)[i]);
+	      h_dr_ph_gen_el->Fill(dr1,wt);
+	      if(dr1<0.2 && abs((*GenParticles_PdgId)[i])==11 && abs((*GenParticles_ParentId)[i])<=24)
+		{ match_el=1;
+		  match_el_pt=(*GenParticles)[i].Pt();
+		}
+	      if(mindr_ph_genobj > dr1) { mindr_ph_genobj = dr1;}
+	    }
+	}
 
-      // for(int i=0;i<GenParticles->size();i++)
-      // 	{ if((*GenParticles)[i].Pt()!=0)
-      // 	    { double dr1=goodphoton.DeltaR((*GenParticles)[i]);
-      // 	      if(dr1<0.2 && abs((*GenParticles_PdgId)[i])==22)
-      // 		{ match_p=1;
-      // 		  match_ph_pt=(*GenParticles)[i].Pt();
-      // 		}
-      // 	    }
-      // 	}
+      for(int i=0;i<GenParticles->size();i++)
+	{ if((*GenParticles)[i].Pt()!=0)
+	    { double dr1=goodphoton.DeltaR((*GenParticles)[i]);
+	      if(dr1<0.2 && abs((*GenParticles_PdgId)[i])==22)
+		{ match_p=1;
+		  match_ph_pt=(*GenParticles)[i].Pt();
+		}
+	    }
+	}
+      h_dr_ph_gen_el_2->Fill(mindr_ph_genobj,wt);
 
-      	
-      //if(match_el==1 && match_p==0) realphoton = true;
-	  // else if(match_el==1 && match_p==0) realphoton=false;
-	  // else if(match_el==1 && match_p==1)
-	  //   { if(abs(goodphoton.Pt() - match_ph_pt) > abs(goodphoton.Pt()-match_el_pt))
-	  // 	{ realphoton=false;}
-	  //   }
-	  // else realphoton=true;
-      //if(!realphoton) continue;
-      
+      if(Electrons->size()==0)
+	{
+	  if(match_el==0) realphoton = true;
+	  else if(match_el==1 && match_p==0) realphoton=false;
+	  else if(match_el==1 && match_p==1)
+	    { if(abs(goodphoton.Pt() - match_ph_pt) > abs(goodphoton.Pt()-match_el_pt))
+		{ realphoton=false;}
+	    }
+	  else realphoton=true;
+	}
+      if(!realphoton) continue;
+
+      // electron matching with jets and lost in a jet ( no need to check this as reco electron collection is defined as isolated electrons
+
+      double mindr_el_jet = 100.0;
+      int index_jet_match_el = -1;
+
+      if(Electrons->size()==1)
+      	{ for(int i=0;i<Jets->size();i++)
+      	    {
+      	      if((*Jets)[i].Pt()>30 && abs((*Jets)[i].Eta())<=2.5)
+      		{
+      		  double dr = (*Electrons)[0].DeltaR((*Jets)[i]);
+      		  if(dr<mindr_el_jet)
+      		    { mindr_el_jet = dr;
+      		      index_jet_match_el = i;}
+      		}
+      	    }
+
+      	   if(index_jet_match_el>=0 && ((*Jets)[index_jet_match_el].Pt())/((*Electrons)[0].Pt())<1.0) continue;
+      	   if(index_jet_match_el<0) continue;
+      	}
       if(gamma_matching_jet_index>=0 && ((*Jets)[gamma_matching_jet_index].Pt())/(goodphoton.Pt())<1.0) continue;
       if(gamma_matching_jet_index<0) continue;
 
 
-      if(MET>100 && goodjets.size()>=2 && (dphi1>0.3 && dphi2 >0.3) && ht>100 && goodphoton.Pt()>100)
+      if(MET>100 && goodjets.size()>=2 && (dphi1>0.3 && dphi2 >0.3) && ht>500 && goodphoton.Pt()>100)
 	{ survived_events+=wt;
 	  h_ht->Fill(ht,wt);
 	  h_met->Fill(MET,wt);
@@ -219,118 +248,120 @@ void lost_mu::EventLoop(const char *data,const char *inputFileList)
 	  h_njets->Fill(goodjets.size(),wt);
 	  h_el_size->Fill(Electrons->size(),wt);
 	  h_mu_size->Fill(Muons->size(),wt);
+	  for(int i=0;i<Electrons->size();i++)
+	    {	  h_dr_el_ph_3->Fill(goodphoton.DeltaR((*Electrons)[i]),wt);         }
 
-	  ll_mu->Fill("NJets_{=0}^{2-4}",0);
-	  ll_mu->Fill("NJets_{#geq 1}^{2-4}",0);
-	  ll_mu->Fill("NJets_{=0}^{5-6}",0);
-	  ll_mu->Fill("NJets_{#geq 1}^{5-6}",0);
-	  ll_mu->Fill("NJets_{=0}^{#geq 7}",0);
-	  ll_mu->Fill("NJets_{#geq 1}^{#geq 7}",0);
+
+	  ll->Fill("NJets_{=0}^{2-4}",0);
+	  ll->Fill("NJets_{#geq 1}^{2-4}",0);
+	  ll->Fill("NJets_{=0}^{5-6}",0);
+	  ll->Fill("NJets_{#geq 1}^{5-6}",0);
+	  ll->Fill("NJets_{=0}^{#geq 7}",0);
+	  ll->Fill("NJets_{#geq 1}^{#geq 7}",0);
 
 	  int njets = goodjets.size();
 
-	  ll_mu_2->Fill("NJets_{0}^{=2} & 100<MET<150",0);
-	  ll_mu_2->Fill("NJets_{0}^{=2} & MET#geq 150",0);
-	  ll_mu_2->Fill("NJets_{0}^{=3} & 100<MET<150",0);
-	  ll_mu_2->Fill("NJets_{0}^{=3} & MET#geq 150",0);
-	  ll_mu_2->Fill("NJets_{0}^{=4} & 100<MET<150",0);
-	  ll_mu_2->Fill("NJets_{0}^{=4} & MET#geq 150",0);
-	  ll_mu_2->Fill("NJets_{0}^{5-6} & 100<MET<150",0);
-	  ll_mu_2->Fill("NJets_{0}^{5-6} & MET#geq 150",0);
-	  ll_mu_2->Fill("NJets_{0}^{#geq7} & 100<MET<150",0);
-	  ll_mu_2->Fill("NJets_{0}^{#geq7} & MET#geq 150",0);
-	  ll_mu_2->Fill("NJets_{#geq 1}^{2-4} & 100<MET<150",0);
-	  ll_mu_2->Fill("NJets_{#geq 1}^{2-4} & MET#geq 150",0);
-	  ll_mu_2->Fill("NJets_{#geq 1}^{5-6} & 100<MET<150",0);
-	  ll_mu_2->Fill("NJets_{#geq 1}^{5-6} & MET#geq 150",0);
-	  ll_mu_2->Fill("NJets_{#geq 1}^{#geq 7} & 100<MET<150",0);
-	  ll_mu_2->Fill("NJets_{#geq 1}^{#geq 7} & MET#geq 150",0); 
-	  
+	  ll_2->Fill("NJets_{0}^{=2} & 100<MET<150",0);
+	  ll_2->Fill("NJets_{0}^{=2} & MET#geq 150",0);
+	  ll_2->Fill("NJets_{0}^{=3} & 100<MET<150",0);
+	  ll_2->Fill("NJets_{0}^{=3} & MET#geq 150",0);
+	  ll_2->Fill("NJets_{0}^{=4} & 100<MET<150",0);
+	  ll_2->Fill("NJets_{0}^{=4} & MET#geq 150",0);
+	  ll_2->Fill("NJets_{0}^{5-6} & 100<MET<150",0);
+	  ll_2->Fill("NJets_{0}^{5-6} & MET#geq 150",0);
+	  ll_2->Fill("NJets_{0}^{#geq7} & 100<MET<150",0);
+	  ll_2->Fill("NJets_{0}^{#geq7} & MET#geq 150",0);
+	  ll_2->Fill("NJets_{#geq 1}^{2-4} & 100<MET<150",0);
+	  ll_2->Fill("NJets_{#geq 1}^{2-4} & MET#geq 150",0);
+	  ll_2->Fill("NJets_{#geq 1}^{5-6} & 100<MET<150",0);
+	  ll_2->Fill("NJets_{#geq 1}^{5-6} & MET#geq 150",0);
+	  ll_2->Fill("NJets_{#geq 1}^{#geq 7} & 100<MET<150",0);
+	  ll_2->Fill("NJets_{#geq 1}^{#geq 7} & MET#geq 150",0);
+
 	  if(BTags==0)
 	    { if(goodjets.size()>=2 && goodjets.size()<=4)
 		{		  
-		  ll_mu->Fill("NJets_{=0}^{2-4}",wt);
+		  ll->Fill("NJets_{=0}^{2-4}",wt);
 		  if(njets==2)
 		    {
 		      if(MET>=100 && MET<150)
-			{ ll_mu_2->Fill("NJets_{0}^{=2} & 100<MET<150",wt);}
+			{ ll_2->Fill("NJets_{0}^{=2} & 100<MET<150",wt);}
 		      if(MET>=150)
-			{ ll_mu_2->Fill("NJets_{0}^{=2} & MET#geq 150",wt);}
+			{ ll_2->Fill("NJets_{0}^{=2} & MET#geq 150",wt);}
 		    }
 		  if(njets==3)
 		    {
 		      if(MET>=100 && MET<150)
-			{ ll_mu_2->Fill("NJets_{0}^{=3} & 100<MET<150",wt);}
+			{ ll_2->Fill("NJets_{0}^{=3} & 100<MET<150",wt);}
 		      if(MET>=150)
-			{ ll_mu_2->Fill("NJets_{0}^{=3} & MET#geq 150",wt);}
+			{ ll_2->Fill("NJets_{0}^{=3} & MET#geq 150",wt);}
 		    }
 		  if(njets==4)
 		    {
 		      if(MET>=100 && MET<150)
-			{ ll_mu_2->Fill("NJets_{0}^{=4} & 100<MET<150",wt);}
+			{ ll_2->Fill("NJets_{0}^{=4} & 100<MET<150",wt);}
 		      if(MET>=150)
-			{ ll_mu_2->Fill("NJets_{0}^{=4} & MET#geq 150",wt);}
+			{ ll_2->Fill("NJets_{0}^{=4} & MET#geq 150",wt);}
 		    }
 		}
 	      if(goodjets.size()>=5 && goodjets.size()<=6)
 		{
-		  ll_mu->Fill("NJets_{=0}^{5-6}",wt);
+		  ll->Fill("NJets_{=0}^{5-6}",wt);
 		  if(MET>=100 && MET<150)
-		    { ll_mu_2->Fill("NJets_{0}^{5-6} & 100<MET<150",wt);}
+		    { ll_2->Fill("NJets_{0}^{5-6} & 100<MET<150",wt);}
 		  if(MET>=150)
-		    { ll_mu_2->Fill("NJets_{0}^{5-6} & MET#geq 150",wt);}
+		    { ll_2->Fill("NJets_{0}^{5-6} & MET#geq 150",wt);}
 		}
 	      if(goodjets.size()>=7)
 		{
-		  ll_mu->Fill("NJets_{=0}^{#geq 7}",wt);
+		  ll->Fill("NJets_{=0}^{#geq 7}",wt);
 		  if(MET>=100 && MET<150)
-		    { ll_mu_2->Fill("NJets_{0}^{#geq7} & 100<MET<150",wt);}
+		    { ll_2->Fill("NJets_{0}^{#geq7} & 100<MET<150",wt);}
 		  if(MET>=150)
-		    { ll_mu_2->Fill("NJets_{0}^{#geq7} & MET#geq 150",wt);}
+		    { ll_2->Fill("NJets_{0}^{#geq7} & MET#geq 150",wt);}
 		}
 
 	    }
 	  if(BTags>=1)
 	    { if(goodjets.size()>=2 && goodjets.size()<=4)
 		{
-		  ll_mu->Fill("NJets_{#geq 1}^{2-4}",wt);
+		  ll->Fill("NJets_{#geq 1}^{2-4}",wt);
 		  if(MET>=100 && MET<150)
-		    { ll_mu_2->Fill("NJets_{#geq 1}^{2-4} & 100<MET<150",wt);}
+		    { ll_2->Fill("NJets_{#geq 1}^{2-4} & 100<MET<150",wt);}
 		  if(MET>=150)
-		    { ll_mu_2->Fill("NJets_{#geq 1}^{2-4} & MET#geq 150",wt);}
+		    { ll_2->Fill("NJets_{#geq 1}^{2-4} & MET#geq 150",wt);}
 		}
 	      if(goodjets.size()>=5 && goodjets.size()<=6)
 		{
-		  ll_mu->Fill("NJets_{#geq 1}^{5-6}",wt);
+		  ll->Fill("NJets_{#geq 1}^{5-6}",wt);
 		  if(MET>=100 && MET<150)
-		    { ll_mu_2->Fill("NJets_{#geq 1}^{5-6} & 100<MET<150",wt);}
+		    { ll_2->Fill("NJets_{#geq 1}^{5-6} & 100<MET<150",wt);}
 		  if(MET>=150)
-		    { ll_mu_2->Fill("NJets_{#geq 1}^{5-6} & MET#geq 150",wt);}
+		    { ll_2->Fill("NJets_{#geq 1}^{5-6} & MET#geq 150",wt);}
 		}
 	      if(goodjets.size()>=7)
 		{
-		  ll_mu->Fill("NJets_{#geq 1}^{#geq 7}",wt);
+		  ll->Fill("NJets_{#geq 1}^{#geq 7}",wt);
 		  if(MET>=100 && MET<150)
-		    { ll_mu_2->Fill("NJets_{#geq 1}^{#geq 7} & 100<MET<150",wt);}
+		    { ll_2->Fill("NJets_{#geq 1}^{#geq 7} & 100<MET<150",wt);}
 		  if(MET>=150)
-		    { ll_mu_2->Fill("NJets_{#geq 1}^{#geq 7} & MET#geq 150",wt);}
-		  
+		    { ll_2->Fill("NJets_{#geq 1}^{#geq 7} & MET#geq 150",wt);}
 		}
 	      
 	    }	
 	  
 	}			
       
-
+      
 
       
     }// loop over entries
+
   cout<<"Events survived = "<<survived_events<<endl;
-  
 }
 	
   
-bool lost_mu::electron_match_photon(TLorentzVector photon)
+bool lost_el::electron_match_photon(TLorentzVector photon)
 { for(int i=0;i<Electrons->size();i++)
     { if(photon.DeltaR((*Electrons)[i])<0.2)
 	{ return true;

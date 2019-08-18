@@ -45,7 +45,7 @@ void lost_el::EventLoop(const char *data,const char *inputFileList)
   Long64_t nbytes = 0, nb = 0;
   int decade = 0;
 
-  double survived_events =0,survived_vetohad=0,not_accepted=0,survived_accept=0,check=0,survived_failed_id=0,survived_failed_iso=0,survived_all=0,events_cr=0;
+  double survived_events =0;
 
   
   ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -142,17 +142,15 @@ void lost_el::EventLoop(const char *data,const char *inputFileList)
 	{ h_mu_pt[0]->Fill((*Muons)[i].Pt(),wt);
 	  h_mu_eta[0]->Fill((*Muons)[i].Eta(),wt);
 	}
-
-      nel[0]->Fill(NElectrons,wt);
-      nmu[0]->Fill(NMuons,wt);
       
-      survived_events+=1;
+      
+
 
       
       // Getting the Gen Information
 
       // ----------------------  Gen level -------------------------
-      vector<TLorentzVector> gen_el, gen_mu,gen_tau,gen_tau_el,gen_tau_mu,gen_ph;
+      vector<TLorentzVector> gen_el, gen_mu,gen_tau,gen_tau_el,gen_tau_mu;
      
       for(int i=0;i<GenParticles->size();i++)
 	{ if((*GenParticles)[i].Pt()!=0)
@@ -173,12 +171,7 @@ void lost_el::EventLoop(const char *data,const char *inputFileList)
 		{ 
 		  gen_tau.push_back((*GenParticles)[i]);
 		}
-	      if((abs((*GenParticles_PdgId)[i])==15))
-		{ if((*GenParticles)[i].Pt()>80)
-		    {
-		      gen_ph.push_back((*GenParticles)[i]);
-		    }
-		}		        
+	      
 	    }
 	}
       
@@ -199,122 +192,28 @@ void lost_el::EventLoop(const char *data,const char *inputFileList)
 	  h_mu_eta[1]->Fill((*Muons)[i].Eta(),wt);
 	}
 
-      gen_el_size[0]->Fill(gen_el.size(),wt);
+      gen_el_size->Fill(gen_el.size(),wt);
       for(int i=0;i<gen_el.size();i++)
 	{ gen_el_pt->Fill(gen_el[i].Pt(),wt);
 	  gen_el_eta->Fill(gen_el[i].Eta(),wt);
 	}
       
-      gen_mu_size[0]->Fill(gen_mu.size(),wt);
+      gen_mu_size->Fill(gen_mu.size(),wt);
       for(int i=0;i<gen_mu.size();i++)
 	{ gen_mu_pt->Fill(gen_mu[i].Pt(),wt);
 	  gen_mu_eta->Fill(gen_mu[i].Eta(),wt);
 	}
-
-      gen_ph_size[0]->Fill(gen_ph.size(),wt);
-      for(int i=0;i<gen_ph.size();i++)
-	{ gen_ph_pt->Fill(gen_ph[i].Pt(),wt);
-	  gen_ph_eta->Fill(gen_ph[i].Eta(),wt);
-	}
-
-      
-      nel[1]->Fill(NElectrons,wt);
-      nmu[1]->Fill(NMuons,wt);
-      
-      survived_vetohad+=1;
-      
-      fill_hist(total1,total2,BTags,MET,goodjets.size(),wt);
       
       
-      // Out of acceptance ////////////////////////////////////////////////
       
-      bool acceptance = true;
-      for(int i=0;i<gen_el.size();i++)
-	{ if((abs(gen_el[i].Eta())>2.5)||(gen_el[i].Pt()<=10))
-	    { not_accepted+=1;
-	      fill_hist(fail_accept1,fail_accept2,BTags,MET,goodjets.size(),wt);
-	      acceptance =false;
-	    }
-	}
-      check+=1;
-      if(!acceptance) continue;
-      ////////////////////////////////////////////////////////////////////
-      survived_accept+=1;
-      nel[2]->Fill(NElectrons,wt);
-      nmu[2]->Fill(NMuons,wt);
-      gen_el_size[1]->Fill(gen_el.size(),wt);
-      gen_mu_size[1]->Fill(gen_mu.size(),wt);
-      gen_ph_size[1]->Fill(gen_ph.size(),wt);
+      fill_hist(*total1,*total2,BTags,MET,goodjets.size(),wt);
       
-
-
-      // Failed Id  ////////////////////////////////////////////////
-
-      // bool identified = true;
-      // for(int i=0;i<gen_el.size();i++)
-      // 	{ if(
-
-
-
-      ////////////////////////////////////////////////////////////
-      survived_failed_id+=1;
-      nel[3]->Fill(NElectrons,wt);
-      nmu[3]->Fill(NMuons,wt);
-      gen_el_size[2]->Fill(gen_el.size(),wt);
-      gen_mu_size[2]->Fill(gen_mu.size(),wt);
-      gen_ph_size[2]->Fill(gen_ph.size(),wt);
-
-
-
-      //   Failed Iso ///////////////////////////////////////////
-
-      bool iso= true;
-      if(NElectrons == 0 || NMuons == 0)
-	{ fill_hist(fail_iso1,fail_iso2,BTags,MET,goodjets.size(),wt);
-	  iso = false;
-	}
-      if(!iso) continue;
-
-
-
-      /////////////////////////////////////////////////////////
-      survived_failed_iso+=1;
-      nel[4]->Fill(NElectrons,wt);
-      nmu[4]->Fill(NMuons,wt);
-      gen_el_size[3]->Fill(gen_el.size(),wt);
-      gen_mu_size[3]->Fill(gen_mu.size(),wt);
-      gen_ph_size[3]->Fill(gen_ph.size(),wt);
-
-      // 1 Lepton CR ///////////////////////////////////////////
-      bool cr = true;
-      if(NElectrons == 1 || NMuons == 1)
-	{ fill_hist(one_lep_cr1,one_lep_cr2,BTags,MET,goodjets.size(),wt);
-	  cr = false;
-	}
-      if(!cr) continue;
-
-
-      /////////////////////////////////////////////////////////
-      survived_all+=1;
-      nel[5]->Fill(NElectrons,wt);
-      nmu[5]->Fill(NMuons,wt);
-      gen_el_size[4]->Fill(gen_el.size(),wt);
-      gen_mu_size[4]->Fill(gen_mu.size(),wt);
-      gen_ph_size[4]->Fill(gen_ph.size(),wt);
+      
+      
       
     }// loop over entries
 
-  cout<<"Events survived preselection =         "<<survived_events<<endl;
-  cout<<"Events survived veto had =             "<<survived_vetohad<<endl;
-  cout<<"Events not accepted by the detector =  "<<not_accepted<<endl;
-  cout<<" CHECK =                               "<<check<<endl;
-  cout<<"Events survived acceptance cut =       "<<survived_accept<<endl;
-  cout<<"Events survived id cut =               "<<survived_failed_id<<endl;
-  cout<<"Events survived iso cut =              "<<survived_failed_iso<<endl;
-  cout<<"Events in 1 lepton CR =                "<<events_cr<<endl;
-  cout<<"Events survived all cut =              "<<survived_all<<endl;
-  
-  
+  cout<<"Events survived = "<<survived_events<<endl;
 }
 	
   
@@ -330,110 +229,103 @@ bool lost_el::electron_match_photon(TLorentzVector photon)
     }
 }
 
-void lost_el::fill_hist(TH1D *h1, TH1D *h2,int btags,double met,int njets,double wt)
+void fill_hist(TH1D h1, TH1D h2,int btags,double met,int njets,double wt)
 {
-  //h1 = TH1D("h1","lost electron in b-jets and njets bins",6,1,7);
-  //h2 = TH1D("h2","lost electron in all the bins",16,1,17);
-  
-  h1->Fill("NJets_{=0}^{2-4}",0);
-  h1->Fill("NJets_{#geq 1}^{2-4}",0);
-  h1->Fill("NJets_{=0}^{5-6}",0);
-  h1->Fill("NJets_{#geq 1}^{5-6}",0);
-  h1->Fill("NJets_{=0}^{#geq 7}",0);
-  h1->Fill("NJets_{#geq 1}^{#geq 7}",0);
+  h1.Fill("NJets_{=0}^{2-4}",0);
+  h1.Fill("NJets_{#geq 1}^{2-4}",0);
+  h1.Fill("NJets_{=0}^{5-6}",0);
+  h1.Fill("NJets_{#geq 1}^{5-6}",0);
+  h1.Fill("NJets_{=0}^{#geq 7}",0);
+  h1.Fill("NJets_{#geq 1}^{#geq 7}",0);
   
   //int njets = goodjets.size();
   
-  h2->Fill("NJets_{0}^{=2} & 100<MET<150",0);
-  h2->Fill("NJets_{0}^{=2} & MET#geq 150",0);
-  h2->Fill("NJets_{0}^{=3} & 100<MET<150",0);
-  h2->Fill("NJets_{0}^{=3} & MET#geq 150",0);
-  h2->Fill("NJets_{0}^{=4} & 100<MET<150",0);
-  h2->Fill("NJets_{0}^{=4} & MET#geq 150",0);
-  h2->Fill("NJets_{0}^{5-6} & 100<MET<150",0);
-  h2->Fill("NJets_{0}^{5-6} & MET#geq 150",0);
-  h2->Fill("NJets_{0}^{#geq7} & 100<MET<150",0);
-  h2->Fill("NJets_{0}^{#geq7} & MET#geq 150",0);
-  h2->Fill("NJets_{#geq 1}^{2-4} & 100<MET<150",0);
-  h2->Fill("NJets_{#geq 1}^{2-4} & MET#geq 150",0);
-  h2->Fill("NJets_{#geq 1}^{5-6} & 100<MET<150",0);
-  h2->Fill("NJets_{#geq 1}^{5-6} & MET#geq 150",0);
-  h2->Fill("NJets_{#geq 1}^{#geq 7} & 100<MET<150",0);
-  h2->Fill("NJets_{#geq 1}^{#geq 7} & MET#geq 150",0);
+  h2.Fill("NJets_{0}^{=2} & 100<MET<150",0);
+  h2.Fill("NJets_{0}^{=2} & MET#geq 150",0);
+  h2.Fill("NJets_{0}^{=3} & 100<MET<150",0);
+  h2.Fill("NJets_{0}^{=3} & MET#geq 150",0);
+  h2.Fill("NJets_{0}^{=4} & 100<MET<150",0);
+  h2.Fill("NJets_{0}^{=4} & MET#geq 150",0);
+  h2.Fill("NJets_{0}^{5-6} & 100<MET<150",0);
+  h2.Fill("NJets_{0}^{5-6} & MET#geq 150",0);
+  h2.Fill("NJets_{0}^{#geq7} & 100<MET<150",0);
+  h2.Fill("NJets_{0}^{#geq7} & MET#geq 150",0);
+  h2.Fill("NJets_{#geq 1}^{2-4} & 100<MET<150",0);
+  h2.Fill("NJets_{#geq 1}^{2-4} & MET#geq 150",0);
+  h2.Fill("NJets_{#geq 1}^{5-6} & 100<MET<150",0);
+  h2.Fill("NJets_{#geq 1}^{5-6} & MET#geq 150",0);
+  h2.Fill("NJets_{#geq 1}^{#geq 7} & 100<MET<150",0);
+  h2.Fill("NJets_{#geq 1}^{#geq 7} & MET#geq 150",0);
   
   if(btags==0)
-    {
-      if(njets>=2 && njets<=4)
+    { if(njets>=2 && njets<=4)
 	{		  
-	  h1->Fill("NJets_{=0}^{2-4}",wt);
+	  h1.Fill("NJets_{=0}^{2-4}",wt);
 	  if(njets==2)
-	    {  
+	    {
 	      if(met>=100 && met<150)
-		{ h2->Fill("NJets_{0}^{=2} & 100<MET<150",wt);}
+		{ h2.Fill("NJets_{0}^{=2} & 100<MET<150",wt);}
 	      if(met>=150)
-		{ h2->Fill("NJets_{0}^{=2} & MET#geq 150",wt);}
+		{ h2.Fill("NJets_{0}^{=2} & MET#geq 150",wt);}
 	    }
 	  if(njets==3)
 	    {
 	      if(met>=100 && met<150)
-		{ h2->Fill("NJets_{0}^{=3} & 100<MET<150",wt);}
+		{ h2.Fill("NJets_{0}^{=3} & 100<MET<150",wt);}
 	      if(met>=150)
-		{ h2->Fill("NJets_{0}^{=3} & MET#geq 150",wt);}
+		{ h2.Fill("NJets_{0}^{=3} & MET#geq 150",wt);}
 	    }
 	  if(njets==4)
 	    {
 	      if(met>=100 && met<150)
-		{ h2->Fill("NJets_{0}^{=4} & 100<MET<150",wt);}
+		{ h2.Fill("NJets_{0}^{=4} & 100<MET<150",wt);}
 	      if(met>=150)
-		{ h2->Fill("NJets_{0}^{=4} & MET#geq 150",wt);}
+		{ h2.Fill("NJets_{0}^{=4} & MET#geq 150",wt);}
 	    }
 	}
       if(njets>=5 && njets<=6)
 	{
-	  h1->Fill("NJets_{=0}^{5-6}",wt);
+	  h1.Fill("NJets_{=0}^{5-6}",wt);
 	  if(met>=100 && met<150)
-	    { h2->Fill("NJets_{0}^{5-6} & 100<MET<150",wt);}
+	    { h2.Fill("NJets_{0}^{5-6} & 100<MET<150",wt);}
 	  if(met>=150)
-	    { h2->Fill("NJets_{0}^{5-6} & MET#geq 150",wt);}
+	    { h2.Fill("NJets_{0}^{5-6} & MET#geq 150",wt);}
 	}
       if(njets>=7)
 	{
-	  h1->Fill("NJets_{=0}^{#geq 7}",wt);
+	  h1.Fill("NJets_{=0}^{#geq 7}",wt);
 	  if(met>=100 && met<150)
-	    { h2->Fill("NJets_{0}^{#geq7} & 100<MET<150",wt);}
+	    { h2.Fill("NJets_{0}^{#geq7} & 100<MET<150",wt);}
 	  if(met>=150)
-	    { h2->Fill("NJets_{0}^{#geq7} & MET#geq 150",wt);}
+	    { h2.Fill("NJets_{0}^{#geq7} & MET#geq 150",wt);}
 	}
 
     }
   if(btags>=1)
     { if(njets>=2 && njets<=4)
 	{
-	  h1->Fill("NJets_{#geq 1}^{2-4}",wt);
+	  h1.Fill("NJets_{#geq 1}^{2-4}",wt);
 	  if(met>=100 && met<150)
-	    { h2->Fill("NJets_{#geq 1}^{2-4} & 100<MET<150",wt);}
+	    { h2.Fill("NJets_{#geq 1}^{2-4} & 100<MET<150",wt);}
 	  if(met>=150)
-	    { h2->Fill("NJets_{#geq 1}^{2-4} & MET#geq 150",wt);}
+	    { h2.Fill("NJets_{#geq 1}^{2-4} & MET#geq 150",wt);}
 	}
       if(njets>=5 && njets<=6)
 	{
-	  h1->Fill("NJets_{#geq 1}^{5-6}",wt);
+	  h1.Fill("NJets_{#geq 1}^{5-6}",wt);
 	  if(met>=100 && met<150)
-	    { h2->Fill("NJets_{#geq 1}^{5-6} & 100<MET<150",wt);}
+	    { h2.Fill("NJets_{#geq 1}^{5-6} & 100<MET<150",wt);}
 	  if(met>=150)
-	    { h2->Fill("NJets_{#geq 1}^{5-6} & MET#geq 150",wt);}
+	    { h2.Fill("NJets_{#geq 1}^{5-6} & MET#geq 150",wt);}
 	}
       if(njets>=7)
 	{
-	  h1->Fill("NJets_{#geq 1}^{#geq 7}",wt);
+	  h1.Fill("NJets_{#geq 1}^{#geq 7}",wt);
 	  if(met>=100 && met<150)
-	    { h2->Fill("NJets_{#geq 1}^{#geq 7} & 100<MET<150",wt);}
+	    { h2.Fill("NJets_{#geq 1}^{#geq 7} & 100<MET<150",wt);}
 	  if(met>=150)
-	    { h2->Fill("NJets_{#geq 1}^{#geq 7} & MET#geq 150",wt);}
+	    { h2.Fill("NJets_{#geq 1}^{#geq 7} & MET#geq 150",wt);}
 	}
 	      
     }
 }
-
-
-

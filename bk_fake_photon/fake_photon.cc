@@ -45,7 +45,7 @@ void fake_photon::EventLoop(const char *data,const char *inputFileList)
   Long64_t nbytes = 0, nb = 0;
   int decade = 0;
 
-  int survived_events =0;
+  double survived_events =0;
 
   
   ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -99,7 +99,7 @@ void fake_photon::EventLoop(const char *data,const char *inputFileList)
       bool matched = electron_match_photon(goodphoton); // checking reco photon and reco electron vectors
       bool goodphoton_hasPixelSeed=true;
       if(goodphoton_index>=0)
-	{ if((*Photons_hasPixelSeed)[goodphoton_index]<0.001) goodphoton_hasPixelSeed=false;
+	{ if((*Photons_hasPixelSeed)[goodphoton_index]>0.001) goodphoton_hasPixelSeed=false;
 	  if(!goodphoton_hasPixelSeed && goodphoton.Pt()>100 && !matched) is_photon = true;
 	}
 
@@ -180,7 +180,7 @@ void fake_photon::EventLoop(const char *data,const char *inputFileList)
       
 
       if(MET>100 && goodjets.size()>=2 && (dphi1>0.3 && dphi2 >0.3) && ht>100 && goodphoton.Pt()>100)
-	{ survived_events+=1;
+	{ survived_events+=wt;
 	  h_ht->Fill(ht,wt);
 	  h_met->Fill(MET,wt);
 	  h_lead_ph_pt->Fill(goodphoton.Pt(),wt);
@@ -215,71 +215,71 @@ void fake_photon::EventLoop(const char *data,const char *inputFileList)
 	  if(BTags==0)
 	    { if(goodjets.size()>=2 && goodjets.size()<=4)
 		{		  
-		  faking_photon->Fill("NJets_{=0}^{2-4}",1);
+		  faking_photon->Fill("NJets_{=0}^{2-4}",wt);
 		  if(njets==2)
 		    {
 		      if(MET>=100 && MET<150)
-			{ faking_photon_2->Fill("NJets_{0}^{=2} & 100<MET<150",1);}
+			{ faking_photon_2->Fill("NJets_{0}^{=2} & 100<MET<150",wt);}
 		      if(MET>=150)
-			{ faking_photon_2->Fill("NJets_{0}^{=2} & MET#geq 150",1);}
+			{ faking_photon_2->Fill("NJets_{0}^{=2} & MET#geq 150",wt);}
 		    }
 		  if(njets==3)
 		    {
 		      if(MET>=100 && MET<150)
-			{ faking_photon_2->Fill("NJets_{0}^{=3} & 100<MET<150",1);}
+			{ faking_photon_2->Fill("NJets_{0}^{=3} & 100<MET<150",wt);}
 		      if(MET>=150)
-			{ faking_photon_2->Fill("NJets_{0}^{=3} & MET#geq 150",1);}
+			{ faking_photon_2->Fill("NJets_{0}^{=3} & MET#geq 150",wt);}
 		    }
 		  if(njets==4)
 		    {
 		      if(MET>=100 && MET<150)
-			{ faking_photon_2->Fill("NJets_{0}^{=4} & 100<MET<150",1);}
+			{ faking_photon_2->Fill("NJets_{0}^{=4} & 100<MET<150",wt);}
 		      if(MET>=150)
-			{ faking_photon_2->Fill("NJets_{0}^{=4} & MET#geq 150",1);}
+			{ faking_photon_2->Fill("NJets_{0}^{=4} & MET#geq 150",wt);}
 		    }
 		}
 	      if(goodjets.size()>=5 && goodjets.size()<=6)
 		{
-		  faking_photon->Fill("NJets_{=0}^{5-6}",1);
+		  faking_photon->Fill("NJets_{=0}^{5-6}",wt);
 		  if(MET>=100 && MET<150)
-		    { faking_photon_2->Fill("NJets_{0}^{5-6} & 100<MET<150",1);}
+		    { faking_photon_2->Fill("NJets_{0}^{5-6} & 100<MET<150",wt);}
 		  if(MET>=150)
-		    { faking_photon_2->Fill("NJets_{0}^{5-6} & MET#geq 150",1);}
+		    { faking_photon_2->Fill("NJets_{0}^{5-6} & MET#geq 150",wt);}
 		}
 	      if(goodjets.size()>=7)
 		{
-		  faking_photon->Fill("NJets_{=0}^{#geq 7}",1);
+		  faking_photon->Fill("NJets_{=0}^{#geq 7}",wt);
 		  if(MET>=100 && MET<150)
-		    { faking_photon_2->Fill("NJets_{0}^{#geq7} & 100<MET<150",1);}
+		    { faking_photon_2->Fill("NJets_{0}^{#geq7} & 100<MET<150",wt);}
 		  if(MET>=150)
-		    { faking_photon_2->Fill("NJets_{0}^{#geq7} & MET#geq 150",1);}
+		    { faking_photon_2->Fill("NJets_{0}^{#geq7} & MET#geq 150",wt);}
 		}
 
 	    }
 	  if(BTags>=1)
 	    { if(goodjets.size()>=2 && goodjets.size()<=4)
 		{
-		  faking_photon->Fill("NJets_{#geq 1}^{2-4}",1);
+		  faking_photon->Fill("NJets_{#geq 1}^{2-4}",wt);
 		  if(MET>=100 && MET<150)
-		    { faking_photon_2->Fill("NJets_{#geq 1}^{2-4} & 100<MET<150",1);}
+		    { faking_photon_2->Fill("NJets_{#geq 1}^{2-4} & 100<MET<150",wt);}
 		  if(MET>=150)
-		    { faking_photon_2->Fill("NJets_{#geq 1}^{2-4} & MET#geq 150",1);}
+		    { faking_photon_2->Fill("NJets_{#geq 1}^{2-4} & MET#geq 150",wt);}
 		}
 	      if(goodjets.size()>=5 && goodjets.size()<=6)
 		{
-		  faking_photon->Fill("NJets_{#geq 1}^{5-6}",1);
+		  faking_photon->Fill("NJets_{#geq 1}^{5-6}",wt);
 		  if(MET>=100 && MET<150)
-		    { faking_photon_2->Fill("NJets_{#geq 1}^{5-6} & 100<MET<150",1);}
+		    { faking_photon_2->Fill("NJets_{#geq 1}^{5-6} & 100<MET<150",wt);}
 		  if(MET>=150)
-		    { faking_photon_2->Fill("NJets_{#geq 1}^{5-6} & MET#geq 150",1);}
+		    { faking_photon_2->Fill("NJets_{#geq 1}^{5-6} & MET#geq 150",wt);}
 		}
 	      if(goodjets.size()>=7)
 		{
-		  faking_photon->Fill("NJets_{#geq 1}^{#geq 7}",1);
+		  faking_photon->Fill("NJets_{#geq 1}^{#geq 7}",wt);
 		  if(MET>=100 && MET<150)
-		    { faking_photon_2->Fill("NJets_{#geq 1}^{#geq 7} & 100<MET<150",1);}
+		    { faking_photon_2->Fill("NJets_{#geq 1}^{#geq 7} & 100<MET<150",wt);}
 		  if(MET>=150)
-		    { faking_photon_2->Fill("NJets_{#geq 1}^{#geq 7} & MET#geq 150",1);}
+		    { faking_photon_2->Fill("NJets_{#geq 1}^{#geq 7} & MET#geq 150",wt);}
 		}
 	      
 	    }	
@@ -291,7 +291,7 @@ void fake_photon::EventLoop(const char *data,const char *inputFileList)
       
     }// loop over entries
 
-  
+  cout<<"Events survived = "<<survived_events<<endl;
 }
 	
   

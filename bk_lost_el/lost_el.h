@@ -28,11 +28,12 @@ class lost_el : public NtupleVariables{
   
   // Intialize histos here
 
-  TH1D *total1,*total2,*fail_accept1,*fail_accept2,*fail_iso1,*fail_iso2,*one_lep_cr1,*one_lep_cr2;
+  TH1D *total1,*total2,*fail_accept1,*fail_accept2,*fail_id1,*fail_id2,*fail_iso1,*fail_iso2,*one_lep_cr1,*one_lep_cr2;
   TH1D *h_st,*h_met,*h_lead_ph_pt[2],*h_lead_ph_eta[2],*h_njets,*h_el_size[2],*h_mu_size[2],*h_el_pt[2],*h_el_eta[2],*h_mu_pt[2],*h_mu_eta[2];
   TH1D *gen_el_pt,*gen_el_size[5],*gen_el_eta,*gen_mu_pt,*gen_mu_eta,*gen_mu_size[5],*gen_tau_size;
   TH1D *gen_ph_pt,*gen_ph_size[5],*gen_ph_eta;
   TH1D *nel[6],*nmu[6];
+  TH1D *mindr_gen_rec_el;
   TFile *oFile;
   
 };
@@ -50,6 +51,8 @@ void lost_el::BookHistogram(const char *outFileName) {
   total2 = new TH1D("total2","lost electron in all the bins",16,1,17);
   fail_accept1 = new TH1D("fail_accept_1","Fail Acceptance in b-jets and njets bins",6,1,7);
   fail_accept2 = new TH1D("fail_accept_2","Fail Acceptance in all the bins",16,1,17);
+  fail_id1 = new TH1D("fail_id_1","Fail Id in b-jets and njets bins",6,1,7);
+  fail_id2 = new TH1D("fail_id_2","Fail Id in all the bins",16,1,17);
   fail_iso1 = new TH1D("fail_iso_1","Fail Iso in b-jets and njets bins",6,1,7);
   fail_iso2 = new TH1D("fail_iso_2","Fail Iso in all the bins",16,1,17);
   one_lep_cr1 = new TH1D("one_lep_cr_1","1 lep cr in b-jets and njets bins",6,1,7);
@@ -118,7 +121,7 @@ void lost_el::BookHistogram(const char *outFileName) {
   gen_ph_size[4] = new TH1D("gen_ph_size_4","Gen ph size after all",5,0,5);
   
   gen_tau_size = new TH1D("gen_tau_size","Gen tau size after preslection and veto hadronic",5,0,5);
-
+  mindr_gen_rec_el = new TH1D("mindr_genel_reco_el","MinDr between gen and reco electron",500,0,5);
 }
 
 

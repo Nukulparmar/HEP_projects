@@ -183,11 +183,9 @@ void lost_el::EventLoop(const char *data,const char *inputFileList)
 		{ 
 		  gen_tau.push_back((*GenParticles)[i]);
 		}
-	      if((abs((*GenParticles_PdgId)[i])==15))
-		{ if((*GenParticles)[i].Pt()>80)
-		    {
-		      gen_ph.push_back((*GenParticles)[i]);
-		    }
+	      if((abs((*GenParticles_PdgId)[i])==22))
+		{
+		  gen_ph.push_back((*GenParticles)[i]);
 		}		        
 	    }
 	}
@@ -232,6 +230,7 @@ void lost_el::EventLoop(const char *data,const char *inputFileList)
       nmu[1]->Fill(NMuons,wt);
       if(gen_el.size()!=1) continue;
       if(gen_mu.size()!=0) continue;
+      if(NElectrons>=2) continue;
       survived_vetohad+=1;
   
       fill_hist(total1,total2,BTags,MET,goodjets.size(),wt);
@@ -247,7 +246,7 @@ void lost_el::EventLoop(const char *data,const char *inputFileList)
       	      acceptance =false;
       	    }
       	}
-      check+=1;
+      
       if(!acceptance) continue;
       //////////////////////////////////////////////////////////////
       survived_accept+=1;
@@ -256,22 +255,68 @@ void lost_el::EventLoop(const char *data,const char *inputFileList)
       gen_el_size[1]->Fill(gen_el.size(),wt);
       gen_mu_size[1]->Fill(gen_mu.size(),wt);
       gen_ph_size[1]->Fill(gen_ph.size(),wt);
+     
+      // Fake photon /////////////////////////////////////////////////
+      double dr=100,match_ph_pt=0,match_el_pt=0;
+      bool isrealphoton = true;
+      bool matched = electron_match_photon(goodphoton);
+      int match_el = 0,match_ph=0;
+      if(gen_el[0].DeltaR(goodphoton)<0.2)
+	{ match_el=1;
+	  match_el_pt=gen_el[0].Pt();
+	}
+      for(int i=0;i<gen_ph.size();i++)
+	{ dr = goodphoton.DeltaR(gen_ph[i]);
+	  if(dr<0.2)
+	    { match_ph=1;
+	      match_ph_pt=gen_ph[i].Pt();
+	    }
+	}
       
+      if(Electrons->size()==0)
+	{ if(match_el==0) isrealphoton=true;
+	  else if(match_el==1 && match_ph==0) isrealphoton=false;
+	  else if(match_el==1 && match_ph==1)
+	    { if(abs(goodphoton.Pt()-match_ph_pt)>abs(goodphoton.Pt()-match_el_pt))
+		{ isrealphoton=false;}
+	    }
+	  else isrealphoton=true;
+	}
+      for(int i=0;i<Electrons->size();i++)
+	{  mindr_reco_el_ph[0]->Fill(MinDr((*Electrons)[i],*Photons),wt);}
       
+      mindr_gen_el_reco_ph[0]->Fill(gen_el[0].DeltaR(goodphoton),wt);
+      if(gen_el[0].DeltaR(goodphoton)<0.2)
+	{ isrealphoton=false;}
+      
+      if(!isrealphoton || matched)
+	{ check+=1;
+	  fill_hist(fake_photon1,fake_photon2,BTags,MET,goodjets.size(),wt);
+	  continue;
+	}
+      //if(!isrealphoton) continue;
 
+      for(int i=0;i<Electrons->size();i++)
+	{ mindr_reco_el_ph[1]->Fill(MinDr((*Electrons)[i],*Photons),wt);}
+      
+      mindr_gen_el_reco_ph[1]->Fill(gen_el[0].DeltaR(goodphoton),wt);
+      
+      
+      
       // Failed Id  ////////////////////////////////////////////////
 
       bool identified = true;
+               
       for(int i=0;i<gen_el.size();i++)
-      	{ mindr_gen_rec_el ->Fill(MinDr(gen_el[i],*Electrons),wt);
-	  if(MinDr(gen_el[i],*Electrons)>0.2 || (gen_el.size()>0 && Electrons->size()==0))
+      	{ 
+	  mindr_gen_rec_el ->Fill(MinDr(gen_el[i],*Electrons),wt);
+	  if((MinDr(gen_el[i],*Electrons)>0.2 || (gen_el.size()>0 && Electrons->size()==0))&&(isrealphoton))
 	    { events_id+=1;
 	      fill_hist(fail_id1,fail_id2,BTags,MET,goodjets.size(),wt);
 	      identified = false;
 	    }
 	}
       if(!identified) continue;
-
       ////////////////////////////////////////////////////////////
       survived_failed_id+=1;
       nel[3]->Fill(NElectrons,wt);
@@ -303,7 +348,7 @@ void lost_el::EventLoop(const char *data,const char *inputFileList)
       gen_ph_size[3]->Fill(gen_ph.size(),wt);
       // 1 Lepton CR ///////////////////////////////////////////
       bool cr = true;
-      if(NElectrons >= 1)
+      if(NElectrons == 1)
       	{ events_cr+=1;
 	  fill_hist(one_lep_cr1,one_lep_cr2,BTags,MET,goodjets.size(),wt);
       	  cr = false;
@@ -323,8 +368,8 @@ void lost_el::EventLoop(const char *data,const char *inputFileList)
   cout<<"Events survived preselection         = "<<survived_events<<endl;
   cout<<"Events survived veto had             = "<<survived_vetohad<<endl;
   cout<<"Events not accepted by the detector  = "<<not_accepted<<endl;
-  cout<<" CHECK                               = "<<check<<endl;
   cout<<"Events survived acceptance cut       = "<<survived_accept<<endl;
+  cout<<" CHECK                               = "<<check<<endl;
   cout<<"Events failed ID                     = "<<events_id<<endl;
   cout<<"Events survived id cut               = "<<survived_failed_id<<endl;
   cout<<"Events failed Iso                    = "<<events_iso<<endl;
@@ -339,12 +384,9 @@ void lost_el::EventLoop(const char *data,const char *inputFileList)
 bool lost_el::electron_match_photon(TLorentzVector photon)
 { for(int i=0;i<Electrons->size();i++)
     { if(photon.DeltaR((*Electrons)[i])<0.2)
-	{ return true;
-	}
-    
+	{ return true;	}
       else
 	{ return false;}
-
     }
 }
 

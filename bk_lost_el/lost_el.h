@@ -28,12 +28,12 @@ class lost_el : public NtupleVariables{
   
   // Intialize histos here
 
-  TH1D *total1,*total2,*fail_accept1,*fail_accept2,*fail_id1,*fail_id2,*fail_iso1,*fail_iso2,*one_lep_cr1,*one_lep_cr2;
+  TH1D *total1,*total2,*fail_accept1,*fail_accept2,*fail_id1,*fail_id2,*fail_iso1,*fail_iso2,*one_lep_cr1,*one_lep_cr2,*fake_photon1,*fake_photon2;
   TH1D *h_st,*h_met,*h_lead_ph_pt[2],*h_lead_ph_eta[2],*h_njets,*h_el_size[2],*h_mu_size[2],*h_el_pt[2],*h_el_eta[2],*h_mu_pt[2],*h_mu_eta[2];
   TH1D *gen_el_pt,*gen_el_size[5],*gen_el_eta,*gen_mu_pt,*gen_mu_eta,*gen_mu_size[5],*gen_tau_size;
   TH1D *gen_ph_pt,*gen_ph_size[5],*gen_ph_eta;
   TH1D *nel[6],*nmu[6];
-  TH1D *mindr_gen_rec_el;
+  TH1D *mindr_gen_rec_el,*mindr_reco_el_ph[2],*mindr_gen_el_reco_ph[2];
   TFile *oFile;
   
 };
@@ -57,6 +57,8 @@ void lost_el::BookHistogram(const char *outFileName) {
   fail_iso2 = new TH1D("fail_iso_2","Fail Iso in all the bins",16,1,17);
   one_lep_cr1 = new TH1D("one_lep_cr_1","1 lep cr in b-jets and njets bins",6,1,7);
   one_lep_cr2 = new TH1D("one_lep_cr_2","1 lep cr in all the bins",16,1,17);
+  fake_photon1 = new TH1D("fake_photon_1","1 lep cr in b-jets and njets bins",6,1,7);
+  fake_photon2 = new TH1D("fake_photon_2","1 lep cr in all the bins",16,1,17);
   
   
   h_st = new TH1D("h_ht","HT after all the preselection",700,0,7000);
@@ -122,6 +124,11 @@ void lost_el::BookHistogram(const char *outFileName) {
   
   gen_tau_size = new TH1D("gen_tau_size","Gen tau size after preslection and veto hadronic",5,0,5);
   mindr_gen_rec_el = new TH1D("mindr_genel_reco_el","MinDr between gen and reco electron",500,0,5);
+  mindr_gen_el_reco_ph[0] = new TH1D("mindr_gen_el_reco_ph_0","MinDr between gen e and reco #gamma",500,0,5);
+  mindr_gen_el_reco_ph[1] = new TH1D("mindr_gen_el_reco_ph_1","MinDr between gen e and reco #gamma after the fake photon cut",500,0,5);
+  mindr_reco_el_ph[0] = new TH1D("mindr_reco_el_ph_0","MinDr between reoc e and reco #gamma",500,0,5);
+  mindr_reco_el_ph[1] = new TH1D("mindr_reco_el_ph_1","MinDr between reoc e and reco #gamma after the fake photon cut",500,0,5);
+  
 }
 
 

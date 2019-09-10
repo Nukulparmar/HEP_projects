@@ -29,3 +29,15 @@ void NtupleVariables::sortTLorVec(vector<TLorentzVector> *vec){
     }
   }
 }
+
+double NtupleVariables::MinDr(TLorentzVector v1,vector<TLorentzVector> v2)
+{
+  double dr = 60;
+  for(int j=0;j<v2.size();j++)
+    { if(dr>=v1.DeltaR(v2[j]))
+	{ dr = v1.DeltaR(v2[j]);}
+    }
+  return dr;
+}
+
+

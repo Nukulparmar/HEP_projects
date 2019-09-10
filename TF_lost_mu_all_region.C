@@ -1,34 +1,34 @@
-void TF_lost_el(char* input)
+void TF_lost_el_all_region(char* input)
 {
   TFile *f1,*f2,*f3,*f4,*f5,*f6;
 
   
   if(strcmp(input,"wgjets_lnu")==0)
     {
-      f1 = new TFile("../../EHEP_Projects/Summer_2019/WGJets_to_Lnu/wgjets_lnu_ll.root");
+      f1 = new TFile("../../EHEP_Projects/Summer_2019/WGJets_to_Lnu/wgjets_lnu_ll_mu.root");
     }
   else if(strcmp(input,"ttjets")==0)
     {
-      f1 = new TFile("../../EHEP_Projects/Summer_2019/TTJets/ttjets_ll.root");
+      f1 = new TFile("../../EHEP_Projects/Summer_2019/TTJets/ttjets_ll_mu.root");
     }
 
   else if(strcmp(input,"ttgjets")==0)
     {
-      f1 = new TFile("../../EHEP_Projects/Summer_2019/TTGJets/ttgjets_ll.root");
+      f1 = new TFile("../../EHEP_Projects/Summer_2019/TTGJets/ttgjets_ll_mu.root");
     }
 
   else if(strcmp(input,"gjets")==0)
     {
-      f1 = new TFile("../../EHEP_Projects/Summer_2019/GJets/gjets_ll.root");
+      f1 = new TFile("../../EHEP_Projects/Summer_2019/GJets/gjets_ll_mu.root");
     }
 
   else if(strcmp(input,"wgjets_monophoton")==0)
     {
-      f1 = new TFile("../../EHEP_Projects/Summer_2019/WGJets_monophotons/wgjets_monophoton_ll.root");
+      f1 = new TFile("../../EHEP_Projects/Summer_2019/WGJets_monophotons/wgjets_monophoton_ll_mu.root");
     }
   else if(strcmp(input,"wgjets")==0)
     {
-      f1 = new TFile("../../EHEP_Projects/Summer_2019/WGJets/wgjets_ll.root");
+      f1 = new TFile("../../EHEP_Projects/Summer_2019/WGJets/wgjets_ll_mu.root");
     }
   else
     { cout<<"please give a proper input"; return 0;
@@ -37,18 +37,18 @@ void TF_lost_el(char* input)
 
   TH1D *fail_accept,*fail_id,*fail_iso,*cr,*fake_photon,*total;
   
-  fake_photon = (TH1D*)f1->Get("fake_photon_1");
-  fail_accept = (TH1D*)f1->Get("fail_accept_1");
-  fail_id     = (TH1D*)f1->Get("fail_id_1");
-  fail_iso    = (TH1D*)f1->Get("fail_iso_1");
-  cr          = (TH1D*)f1->Get("one_lep_cr_1");
-  total       = (TH1D*)f1->Get("total1");
+  fake_photon = (TH1D*)f1->Get("fake_photon_2");
+  fail_accept = (TH1D*)f1->Get("fail_accept_2");
+  fail_id     = (TH1D*)f1->Get("fail_id_2");
+  fail_iso    = (TH1D*)f1->Get("fail_iso_2");
+  cr          = (TH1D*)f1->Get("one_lep_cr_2");
+  total       = (TH1D*)f1->Get("total2");
   
   
   
   
   // double total=0;
-  const char* str[9] = {"NJets_{=0}^{2-4}","NJets_{= 1}^{2-4}","NJets_{#geq 2}^{2-4}","NJets_{=0}^{5-6}","NJets_{= 1}^{5-6}","NJets_{#geq 2}^{5-6}","NJets_{=0}^{#geq 7}","NJets_{= 1}^{#geq 7}","NJets_{#geq 2}^{#geq 7}"};
+  const char* str[] = {"NJets_{0}^{=2} & 100<MET<150","NJets_{0}^{=2} & MET#geq 150","NJets_{0}^{=3} & 100<MET<150","NJets_{0}^{=3} & MET#geq 150","NJets_{0}^{=4} & 100<MET<150","NJets_{0}^{=4} & MET#geq 150","NJets_{0}^{5-6} & 100<MET<150","NJets_{0}^{5-6} & MET#geq 150","NJets_{0}^{#geq7} & 100<MET<150","NJets_{0}^{#geq7} & MET#geq 150","NJets_{#geq 1}^{2-4} & 100<MET<150","NJets_{#geq 1}^{2-4} & MET#geq 150","NJets_{#geq 1}^{5-6} & 100<MET<150","NJets_{#geq 1}^{5-6} & MET#geq 150","NJets_{#geq 1}^{#geq 7} & 100<MET<150","NJets_{#geq 1}^{#geq 7} & MET#geq 150"};
   
   // for(int i=1;i<=6;i++)
   //   {
@@ -87,8 +87,8 @@ void TF_lost_el(char* input)
   gStyle->SetPalette(kOcean);
   fail_accept->SetFillStyle(3008);
   fail_accept->SetFillColor(kGreen);
-  fail_id->SetFillStyle(3021);
-  fail_id->SetFillColor(kRed);
+  fail_id->SetFillStyle(3019);
+  fail_id->SetFillColor(kOrange);
   fail_iso->SetFillStyle(3144);
   fail_iso->SetFillColor(kBlue+3);
   fake_photon->SetFillColor(kBlue-9);
@@ -99,9 +99,9 @@ void TF_lost_el(char* input)
   stack->Add(fail_accept);
   stack->Add(fail_id);
   stack->Add(fail_iso);
-  // stack->Add(fake_photon);
+  stack->Add(fake_photon);
   stack->Draw("hist");
-  legend->SetNColumns(2);
+  legend->SetNColumns(3);
   legend->SetBorderSize(1);
 
   stack->GetYaxis()->SetTitleSize(0.05);
@@ -113,20 +113,20 @@ void TF_lost_el(char* input)
   stack->SetTitle(input);
 
 
-  legend->AddEntry(cr,"1e CR","f");
+  legend->AddEntry(cr,"1L CR","f");
   legend->AddEntry(fail_accept,"Fail Accept","f");
   legend->AddEntry(fail_id,"Fail Id","f");
   legend->AddEntry(fail_iso,"Fail Iso","f");
-  //legend->AddEntry(fake_photon,"Fake photon","f");
+  legend->AddEntry(fake_photon,"Fake photon","f");
   legend->SetTextSize(0.03);
   legend->Draw();
 
 
   pad2->cd();
 
-  TH1D *TF = new TH1D("tf","Transfer factor",9,1,10);
-  for(int i=1;i<=9;i++)
-    { TF->GetXaxis()->SetBinLabel(i,str[i-1]);}
+  TH1D *TF = new TH1D("tf","Transfer factor",16,1,17);
+  for(int i=1;i<17;i++)
+    { TF->GetXaxis()->SetBinLabel(i,str[i-1]); }
   TF->Add(fail_accept);
   TF->Add(fail_id);
   TF->Add(fail_iso);
@@ -139,9 +139,9 @@ void TF_lost_el(char* input)
   TF->SetTitle(0);
 
   TF->GetXaxis()->SetTitle(0);
-  TF->GetXaxis()->SetLabelSize(0.20);
+  TF->GetXaxis()->SetLabelSize(0.06);
 
-  TF->GetYaxis()->SetTitle("Transfer factor");
+  TF->GetYaxis()->SetTitle("Transfer factor muons");
   TF->GetYaxis()->SetTitleOffset(0.35);
   TF->GetYaxis()->SetTitleSize(0.13);
   TF->GetYaxis()->SetLabelSize(0.09);
@@ -149,8 +149,7 @@ void TF_lost_el(char* input)
   //TF->SetMaximum(1.99);
   //TF->SetMinimum(0.01);
 
-  for(int i=1;i<=9;i++)
-    { cout<<"The Transfer Factor in bin"<<i<<" = "<<TF->GetBinContent(i)<<" +- "<<TF->GetBinError(i)<<endl;}
-  
+  for(int i=1;i<17;i++)
+    { cout<<"The Transfer Factor in bin"<<i<<" = "<<TF->GetBinContent(i)<<" +- "<<TF->GetBinError(i)<<endl; }
 }
 

@@ -45,8 +45,8 @@ void lost_el::EventLoop(const char *data,const char *inputFileList)
   Long64_t nbytes = 0, nb = 0;
   int decade = 0;
 
-  double survived_events =0,survived_vetohad=0,not_accepted=0,survived_accept=0,check=0,survived_failed_id=0,survived_failed_iso=0,survived_all=0,events_cr=0,events_id=0,events_iso=0;
-
+  double survived_events =0,survived_vetohad=0,not_accepted=0,survived_accept=0,check=0,survived_failed_id=0,survived_failed_iso=0,survived_all=0,events_cr=0,events_id=0,events_failiso=0;
+  int event_iso2=0,event_fakephoton=0,event_miniiso=0,event_failminiiso=0,event_failiso2=0,event_failiso=0,event_photonfakes=0,event_iso=0;
   
   ///////////////////////////////////////////////////////////////////////////////////////////////
   for (Long64_t jentry=0; jentry<nentries;jentry++)
@@ -192,8 +192,6 @@ void lost_el::EventLoop(const char *data,const char *inputFileList)
       
       if(gen_el.size()==0 && gen_mu.size()==0 && gen_tau_el.size()==0 && gen_tau_mu.size()==0) continue; // rejecting hadronic decays
 
-      h_lead_ph_pt[1]->Fill(goodphoton.Pt(),wt);
-      h_lead_ph_eta[1]->Fill(goodphoton.Eta(),wt);
       
       h_el_size[1]->Fill(Electrons->size(),wt);
       for(int i=0;i<Electrons->size();i++)
@@ -232,9 +230,64 @@ void lost_el::EventLoop(const char *data,const char *inputFileList)
       if(gen_mu.size()!=0) continue;
       if(NElectrons>=2) continue;
       survived_vetohad+=1;
+      h_lead_ph_pt[1]->Fill(goodphoton.Pt(),wt);
+      h_lead_ph_eta[1]->Fill(goodphoton.Eta(),wt);
   
-      fill_hist(total1,total2,BTags,MET,goodjets.size(),wt);
+      // fill_hist(total1,total2,BTags,MET,goodjets.size(),wt);
       
+      // Test //////////////////
+            // Fake photon /////////////////////////////////////////////////
+      double dr=100,match_ph_pt=0,match_el_pt=0;
+      bool isrealphoton = true;
+      bool matched = electron_match_photon(goodphoton);
+      int match_el = 0,match_ph=0;
+      if(gen_el[0].DeltaR(goodphoton)<0.2)
+      	{ match_el=1;
+      	  match_el_pt=gen_el[0].Pt();
+      	}
+      for(int i=0;i<gen_ph.size();i++)
+      	{ dr = goodphoton.DeltaR(gen_ph[i]);
+      	  if(dr<0.2)
+      	    { match_ph=1;
+      	      match_ph_pt=gen_ph[i].Pt();
+      	    }
+      	}
+      
+      if(Electrons->size()==0)
+      	{ if(match_el==0) isrealphoton=true;
+      	  else if(match_el==1 && match_ph==0) isrealphoton=false;
+      	  else if(match_el==1 && match_ph==1)
+      	    { if(abs(goodphoton.Pt()-match_ph_pt)>abs(goodphoton.Pt()-match_el_pt))
+      		{ isrealphoton=false;}
+      	    }
+      	  else isrealphoton=true;
+      	}
+      for(int i=0;i<Electrons->size();i++)
+      	{  mindr_reco_el_ph[0]->Fill(MinDr((*Electrons)[i],*Photons),wt);}
+      
+      mindr_gen_el_reco_ph[0]->Fill(gen_el[0].DeltaR(goodphoton),wt);
+      if(gen_el[0].DeltaR(goodphoton)<0.2)
+      	{ isrealphoton=false;}
+      if(Photons_electronFakes)
+      	{      event_photonfakes+=1;	}
+      if(!isrealphoton || matched)
+      	{ event_fakephoton+=1;
+      	  fill_hist(fake_photon1,fake_photon2,BTags,MET,goodjets.size(),wt);
+      	  continue;
+      	}
+      //if(!isrealphoton) continue;
+
+      for(int i=0;i<Electrons->size();i++)
+      	{ mindr_reco_el_ph[1]->Fill(MinDr((*Electrons)[i],*Photons),wt);}
+      
+      mindr_gen_el_reco_ph[1]->Fill(gen_el[0].DeltaR(goodphoton),wt);
+      
+      
+      
+
+      fill_hist(total1,total2,BTags,MET,goodjets.size(),wt);
+
+
       
       // Out of acceptance ////////////////////////////////////////////////
       
@@ -256,50 +309,51 @@ void lost_el::EventLoop(const char *data,const char *inputFileList)
       gen_mu_size[1]->Fill(gen_mu.size(),wt);
       gen_ph_size[1]->Fill(gen_ph.size(),wt);
      
-      // Fake photon /////////////////////////////////////////////////
-      double dr=100,match_ph_pt=0,match_el_pt=0;
-      bool isrealphoton = true;
-      bool matched = electron_match_photon(goodphoton);
-      int match_el = 0,match_ph=0;
-      if(gen_el[0].DeltaR(goodphoton)<0.2)
-	{ match_el=1;
-	  match_el_pt=gen_el[0].Pt();
-	}
-      for(int i=0;i<gen_ph.size();i++)
-	{ dr = goodphoton.DeltaR(gen_ph[i]);
-	  if(dr<0.2)
-	    { match_ph=1;
-	      match_ph_pt=gen_ph[i].Pt();
-	    }
-	}
+      // // Fake photon /////////////////////////////////////////////////
+      // double dr=100,match_ph_pt=0,match_el_pt=0;
+      // bool isrealphoton = true;
+      // bool matched = electron_match_photon(goodphoton);
+      // int match_el = 0,match_ph=0;
+      // if(gen_el[0].DeltaR(goodphoton)<0.2)
+      // 	{ match_el=1;
+      // 	  match_el_pt=gen_el[0].Pt();
+      // 	}
+      // for(int i=0;i<gen_ph.size();i++)
+      // 	{ dr = goodphoton.DeltaR(gen_ph[i]);
+      // 	  if(dr<0.2)
+      // 	    { match_ph=1;
+      // 	      match_ph_pt=gen_ph[i].Pt();
+      // 	    }
+      // 	}
       
-      if(Electrons->size()==0)
-	{ if(match_el==0) isrealphoton=true;
-	  else if(match_el==1 && match_ph==0) isrealphoton=false;
-	  else if(match_el==1 && match_ph==1)
-	    { if(abs(goodphoton.Pt()-match_ph_pt)>abs(goodphoton.Pt()-match_el_pt))
-		{ isrealphoton=false;}
-	    }
-	  else isrealphoton=true;
-	}
-      for(int i=0;i<Electrons->size();i++)
-	{  mindr_reco_el_ph[0]->Fill(MinDr((*Electrons)[i],*Photons),wt);}
+      // if(Electrons->size()==0)
+      // 	{ if(match_el==0) isrealphoton=true;
+      // 	  else if(match_el==1 && match_ph==0) isrealphoton=false;
+      // 	  else if(match_el==1 && match_ph==1)
+      // 	    { if(abs(goodphoton.Pt()-match_ph_pt)>abs(goodphoton.Pt()-match_el_pt))
+      // 		{ isrealphoton=false;}
+      // 	    }
+      // 	  else isrealphoton=true;
+      // 	}
+      // for(int i=0;i<Electrons->size();i++)
+      // 	{  mindr_reco_el_ph[0]->Fill(MinDr((*Electrons)[i],*Photons),wt);}
       
-      mindr_gen_el_reco_ph[0]->Fill(gen_el[0].DeltaR(goodphoton),wt);
-      if(gen_el[0].DeltaR(goodphoton)<0.2)
-	{ isrealphoton=false;}
-      
-      if(!isrealphoton || matched)
-	{ check+=1;
-	  fill_hist(fake_photon1,fake_photon2,BTags,MET,goodjets.size(),wt);
-	  continue;
-	}
-      //if(!isrealphoton) continue;
+      // mindr_gen_el_reco_ph[0]->Fill(gen_el[0].DeltaR(goodphoton),wt);
+      // if(gen_el[0].DeltaR(goodphoton)<0.2)
+      // 	{ isrealphoton=false;}
+      // if(Photons_electronFakes)
+      // 	{      event_photonfakes+=1;	}
+      // if(!isrealphoton || matched)
+      // 	{ event_fakephoton+=1;
+      // 	  fill_hist(fake_photon1,fake_photon2,BTags,MET,goodjets.size(),wt);
+      // 	  continue;
+      // 	}
+      // //if(!isrealphoton) continue;
 
-      for(int i=0;i<Electrons->size();i++)
-	{ mindr_reco_el_ph[1]->Fill(MinDr((*Electrons)[i],*Photons),wt);}
+      // for(int i=0;i<Electrons->size();i++)
+      // 	{ mindr_reco_el_ph[1]->Fill(MinDr((*Electrons)[i],*Photons),wt);}
       
-      mindr_gen_el_reco_ph[1]->Fill(gen_el[0].DeltaR(goodphoton),wt);
+      // mindr_gen_el_reco_ph[1]->Fill(gen_el[0].DeltaR(goodphoton),wt);
       
       
       
@@ -310,7 +364,7 @@ void lost_el::EventLoop(const char *data,const char *inputFileList)
       for(int i=0;i<gen_el.size();i++)
       	{ 
 	  mindr_gen_rec_el ->Fill(MinDr(gen_el[i],*Electrons),wt);
-	  if((MinDr(gen_el[i],*Electrons)>0.2 || (gen_el.size()>0 && Electrons->size()==0))&&(isrealphoton))
+	  if((MinDr(gen_el[i],*Electrons)>0.2))/* || (gen_el.size()>0 && Electrons->size()==0)))*/
 	    { events_id+=1;
 	      fill_hist(fail_id1,fail_id2,BTags,MET,goodjets.size(),wt);
 	      identified = false;
@@ -331,10 +385,27 @@ void lost_el::EventLoop(const char *data,const char *inputFileList)
       
       bool isol= true;
       if(NElectrons == 0)
-      	{ events_iso+=1; 
+      	{ event_failiso+=1; 
       	  fill_hist(fail_iso1,fail_iso2,BTags,MET,goodjets.size(),wt);
       	  isol = false;
       	}
+      if(Electrons->size()!=0 && !Electrons_passIso)
+	{ event_failiso2+=1;	}
+      if(NElectrons>0)
+	{ event_iso+=1;} 
+      if(Electrons->size()!=0 && Electrons_passIso)
+	{ event_iso2+=1;	}
+  
+
+      bool miniIso=false;
+      for(int i=0;i<Electrons_MiniIso->size();i++)
+	{ if((*Electrons_MiniIso)[i]<0.1)
+	    { miniIso = true;}
+	}
+      if(miniIso)
+	{ event_miniiso+=1;}
+      else if(!miniIso)
+	{ event_failminiiso+=1;}
       
       if(!isol) continue;
       
@@ -353,6 +424,7 @@ void lost_el::EventLoop(const char *data,const char *inputFileList)
 	  fill_hist(one_lep_cr1,one_lep_cr2,BTags,MET,goodjets.size(),wt);
       	  cr = false;
       	}
+      
       if(!cr) continue;
 
       /////////////////////////////////////////////////////////
@@ -365,17 +437,23 @@ void lost_el::EventLoop(const char *data,const char *inputFileList)
       
     }// loop over entries
   
-  cout<<"Events survived preselection         = "<<survived_events<<endl;
-  cout<<"Events survived veto had             = "<<survived_vetohad<<endl;
-  cout<<"Events not accepted by the detector  = "<<not_accepted<<endl;
-  cout<<"Events survived acceptance cut       = "<<survived_accept<<endl;
-  cout<<" CHECK                               = "<<check<<endl;
-  cout<<"Events failed ID                     = "<<events_id<<endl;
-  cout<<"Events survived id cut               = "<<survived_failed_id<<endl;
-  cout<<"Events failed Iso                    = "<<events_iso<<endl;
-  cout<<"Events survived iso cut              = "<<survived_failed_iso<<endl;
-  cout<<"Events in 1 lepton CR                = "<<events_cr<<endl;
-  cout<<"Events survived all cut              = "<<survived_all<<endl;
+  cout<<"Events survived preselection             = "<<survived_events<<endl;
+  cout<<"Events survived veto had                 = "<<survived_vetohad<<endl;
+  cout<<"Events not accepted by the detector      = "<<not_accepted<<endl;
+  cout<<"Events survived acceptance cut           = "<<survived_accept<<endl;
+  cout<<"Events where gen electron fakes as photon= "<<event_fakephoton<<endl;
+  cout<<"Events passing Photon_electronfakes      = "<<event_photonfakes<<endl;
+  cout<<"Events failed ID                         = "<<events_id<<endl;
+  cout<<"Events survived id cut                   = "<<survived_failed_id<<endl;
+  cout<<"Events failed Iso (NElecltrons==0)       = "<<event_failiso<<endl;
+  cout<<"Events failed pass iso (!passiso)        = "<<event_failiso2<<endl;
+  cout<<"Events failed mini iso (MiniIso>0.2)     = "<<event_failminiiso<<endl;
+  cout<<"Events pass NElectrons>0                 = "<<event_iso<<endl;
+  cout<<"Events pass (passIso)                    = "<<event_iso2<<endl;
+  cout<<"Events pass miniiso <0.1                 = "<<event_miniiso<<endl;
+  cout<<"Events survived iso cut                  = "<<survived_failed_iso<<endl;
+  cout<<"Events in 1 lepton CR                    = "<<events_cr<<endl;
+  cout<<"Events survived all cut                  = "<<survived_all<<endl;
   
   
 }
@@ -396,11 +474,14 @@ void lost_el::fill_hist(TH1D *h1, TH1D *h2,int btags,double met,int njets,double
   //h2 = TH1D("h2","lost electron in all the bins",16,1,17);
   
   h1->Fill("NJets_{=0}^{2-4}",0);
-  h1->Fill("NJets_{#geq 1}^{2-4}",0);
+  h1->Fill("NJets_{= 1}^{2-4}",0);
+  h1->Fill("NJets_{#geq 2}^{2-4}",0);
   h1->Fill("NJets_{=0}^{5-6}",0);
-  h1->Fill("NJets_{#geq 1}^{5-6}",0);
+  h1->Fill("NJets_{= 1}^{5-6}",0);
+  h1->Fill("NJets_{#geq 2}^{5-6}",0);
   h1->Fill("NJets_{=0}^{#geq 7}",0);
-  h1->Fill("NJets_{#geq 1}^{#geq 7}",0);
+  h1->Fill("NJets_{= 1}^{#geq 7}",0);
+  h1->Fill("NJets_{#geq 2}^{#geq 7}",0);
   
   //int njets = goodjets.size();
   
@@ -414,12 +495,18 @@ void lost_el::fill_hist(TH1D *h1, TH1D *h2,int btags,double met,int njets,double
   h2->Fill("NJets_{0}^{5-6} & MET#geq 150",0);
   h2->Fill("NJets_{0}^{#geq7} & 100<MET<150",0);
   h2->Fill("NJets_{0}^{#geq7} & MET#geq 150",0);
-  h2->Fill("NJets_{#geq 1}^{2-4} & 100<MET<150",0);
-  h2->Fill("NJets_{#geq 1}^{2-4} & MET#geq 150",0);
-  h2->Fill("NJets_{#geq 1}^{5-6} & 100<MET<150",0);
-  h2->Fill("NJets_{#geq 1}^{5-6} & MET#geq 150",0);
-  h2->Fill("NJets_{#geq 1}^{#geq 7} & 100<MET<150",0);
-  h2->Fill("NJets_{#geq 1}^{#geq 7} & MET#geq 150",0);
+  h2->Fill("NJets_{= 1}^{2-4} & 100<MET<150",0);
+  h2->Fill("NJets_{= 1}^{2-4} & MET#geq 150",0);
+  h2->Fill("NJets_{= 1}^{5-6} & 100<MET<150",0);
+  h2->Fill("NJets_{= 1}^{5-6} & MET#geq 150",0);
+  h2->Fill("NJets_{= 1}^{#geq 7} & 100<MET<150",0);
+  h2->Fill("NJets_{= 1}^{#geq 7} & MET#geq 150",0);
+  h2->Fill("NJets_{#geq 2}^{2-4} & 100<MET<150",0);
+  h2->Fill("NJets_{#geq 2}^{2-4} & MET#geq 150",0);
+  h2->Fill("NJets_{#geq 2}^{5-6} & 100<MET<150",0);
+  h2->Fill("NJets_{#geq 2}^{5-6} & MET#geq 150",0);
+  h2->Fill("NJets_{#geq 2}^{#geq 7} & 100<MET<150",0);
+  h2->Fill("NJets_{#geq 2}^{#geq 7} & MET#geq 150",0);
   
   if(btags==0)
     {
@@ -466,30 +553,57 @@ void lost_el::fill_hist(TH1D *h1, TH1D *h2,int btags,double met,int njets,double
 	}
 
     }
-  if(btags>=1)
+  if(btags==1)
     { if(njets>=2 && njets<=4)
 	{
-	  h1->Fill("NJets_{#geq 1}^{2-4}",wt);
+	  h1->Fill("NJets_{= 1}^{2-4}",wt);
 	  if(met>=100 && met<150)
-	    { h2->Fill("NJets_{#geq 1}^{2-4} & 100<MET<150",wt);}
+	    { h2->Fill("NJets_{= 1}^{2-4} & 100<MET<150",wt);}
 	  if(met>=150)
-	    { h2->Fill("NJets_{#geq 1}^{2-4} & MET#geq 150",wt);}
+	    { h2->Fill("NJets_{= 1}^{2-4} & MET#geq 150",wt);}
 	}
       if(njets>=5 && njets<=6)
 	{
-	  h1->Fill("NJets_{#geq 1}^{5-6}",wt);
+	  h1->Fill("NJets_{= 1}^{5-6}",wt);
 	  if(met>=100 && met<150)
-	    { h2->Fill("NJets_{#geq 1}^{5-6} & 100<MET<150",wt);}
+	    { h2->Fill("NJets_{= 1}^{5-6} & 100<MET<150",wt);}
 	  if(met>=150)
-	    { h2->Fill("NJets_{#geq 1}^{5-6} & MET#geq 150",wt);}
+	    { h2->Fill("NJets_{= 1}^{5-6} & MET#geq 150",wt);}
 	}
       if(njets>=7)
 	{
-	  h1->Fill("NJets_{#geq 1}^{#geq 7}",wt);
+	  h1->Fill("NJets_{= 1}^{#geq 7}",wt);
 	  if(met>=100 && met<150)
-	    { h2->Fill("NJets_{#geq 1}^{#geq 7} & 100<MET<150",wt);}
+	    { h2->Fill("NJets_{= 1}^{#geq 7} & 100<MET<150",wt);}
 	  if(met>=150)
-	    { h2->Fill("NJets_{#geq 1}^{#geq 7} & MET#geq 150",wt);}
+	    { h2->Fill("NJets_{= 1}^{#geq 7} & MET#geq 150",wt);}
+	}
+	      
+    }
+  if(btags>=2)
+    { if(njets>=2 && njets<=4)
+	{
+	  h1->Fill("NJets_{#geq 2}^{2-4}",wt);
+	  if(met>=100 && met<150)
+	    { h2->Fill("NJets_{#geq 2}^{2-4} & 100<MET<150",wt);}
+	  if(met>=150)
+	    { h2->Fill("NJets_{#geq 2}^{2-4} & MET#geq 150",wt);}
+	}
+      if(njets>=5 && njets<=6)
+	{
+	  h1->Fill("NJets_{#geq 2}^{5-6}",wt);
+	  if(met>=100 && met<150)
+	    { h2->Fill("NJets_{#geq 2}^{5-6} & 100<MET<150",wt);}
+	  if(met>=150)
+	    { h2->Fill("NJets_{#geq 2}^{5-6} & MET#geq 150",wt);}
+	}
+      if(njets>=7)
+	{
+	  h1->Fill("NJets_{#geq 2}^{#geq 7}",wt);
+	  if(met>=100 && met<150)
+	    { h2->Fill("NJets_{#geq 2}^{#geq 7} & 100<MET<150",wt);}
+	  if(met>=150)
+	    { h2->Fill("NJets_{#geq 2}^{#geq 7} & MET#geq 150",wt);}
 	}
 	      
     }

@@ -5,30 +5,30 @@ void TF_lost_el(char* input)
   
   if(strcmp(input,"wgjets_lnu")==0)
     {
-      f1 = new TFile("../../EHEP_Projects/Summer_2019/WGJets_to_Lnu/wgjets_lnu_ll.root");
+      f1 = new TFile("../../EHEP_Projects/Summer_2019/WGJets_to_Lnu/wgjets_lnu_ll_mu.root");
     }
   else if(strcmp(input,"ttjets")==0)
     {
-      f1 = new TFile("../../EHEP_Projects/Summer_2019/TTJets/ttjets_ll.root");
+      f1 = new TFile("../../EHEP_Projects/Summer_2019/TTJets/ttjets_ll_mu.root");
     }
 
   else if(strcmp(input,"ttgjets")==0)
     {
-      f1 = new TFile("../../EHEP_Projects/Summer_2019/TTGJets/ttgjets_ll.root");
+      f1 = new TFile("../../EHEP_Projects/Summer_2019/TTGJets/ttgjets_ll_mu.root");
     }
 
   else if(strcmp(input,"gjets")==0)
     {
-      f1 = new TFile("../../EHEP_Projects/Summer_2019/GJets/gjets_ll.root");
+      f1 = new TFile("../../EHEP_Projects/Summer_2019/GJets/gjets_ll_mu.root");
     }
 
   else if(strcmp(input,"wgjets_monophoton")==0)
     {
-      f1 = new TFile("../../EHEP_Projects/Summer_2019/WGJets_monophotons/wgjets_monophoton_ll.root");
+      f1 = new TFile("../../EHEP_Projects/Summer_2019/WGJets_monophotons/wgjets_monophoton_ll_mu.root");
     }
   else if(strcmp(input,"wgjets")==0)
     {
-      f1 = new TFile("../../EHEP_Projects/Summer_2019/WGJets/wgjets_ll.root");
+      f1 = new TFile("../../EHEP_Projects/Summer_2019/WGJets/wgjets_ll_mu.root");
     }
   else
     { cout<<"please give a proper input"; return 0;
@@ -99,9 +99,9 @@ void TF_lost_el(char* input)
   stack->Add(fail_accept);
   stack->Add(fail_id);
   stack->Add(fail_iso);
-  // stack->Add(fake_photon);
+  stack->Add(fake_photon);
   stack->Draw("hist");
-  legend->SetNColumns(2);
+  legend->SetNColumns(3);
   legend->SetBorderSize(1);
 
   stack->GetYaxis()->SetTitleSize(0.05);
@@ -113,11 +113,11 @@ void TF_lost_el(char* input)
   stack->SetTitle(input);
 
 
-  legend->AddEntry(cr,"1e CR","f");
+  legend->AddEntry(cr,"1L CR","f");
   legend->AddEntry(fail_accept,"Fail Accept","f");
   legend->AddEntry(fail_id,"Fail Id","f");
   legend->AddEntry(fail_iso,"Fail Iso","f");
-  //legend->AddEntry(fake_photon,"Fake photon","f");
+  legend->AddEntry(fake_photon,"Fake photon","f");
   legend->SetTextSize(0.03);
   legend->Draw();
 
@@ -139,9 +139,9 @@ void TF_lost_el(char* input)
   TF->SetTitle(0);
 
   TF->GetXaxis()->SetTitle(0);
-  TF->GetXaxis()->SetLabelSize(0.20);
+  TF->GetXaxis()->SetLabelSize(0.12);
 
-  TF->GetYaxis()->SetTitle("Transfer factor");
+  TF->GetYaxis()->SetTitle("Transfer factor muons");
   TF->GetYaxis()->SetTitleOffset(0.35);
   TF->GetYaxis()->SetTitleSize(0.13);
   TF->GetYaxis()->SetLabelSize(0.09);

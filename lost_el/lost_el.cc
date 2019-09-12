@@ -64,7 +64,7 @@ void lost_el::EventLoop(const char *data,const char *inputFileList)
       if (ientry < 0) break;
       nb = fChain->GetEntry(jentry);   nbytes += nb;
   
-      Double_t wt = 35.9*1000*(Weight);
+      Double_t wt =1;// 35.9*1000*(Weight);
 
       vector<TLorentzVector> goodphotons;
 
@@ -157,10 +157,10 @@ void lost_el::EventLoop(const char *data,const char *inputFileList)
       nmu[0]->Fill(NMuons,wt);
       
       ////////         Preselection cut                 //////////////////
-      if((goodphoton.Pt()>100)&&(MET>200)&&(dphi1>0.3)&&(dphi2>0.3)&&(((st<800 && goodphoton.Pt()<100) || (st<500 && goodphoton.Pt()<190)))&&(isoMuonTracks==0)&&(isoPionTracks==0)&&(goodjets.size()>=2))
+      if((goodphoton.Pt()>100)&&(MET>200)&&(dphi1>0.3)&&(dphi2>0.3)&&(((st>800 && goodphoton.Pt()>100) || (st>500 && goodphoton.Pt()>190)))&&(isoMuonTracks==0)&&(isoPionTracks==0)&&(goodjets.size()>=2))
 	{ 
+	  //	  cout<<"Not here"<<endl;
 
-	  
 	  survived_events+=1;
 
 
@@ -172,29 +172,30 @@ void lost_el::EventLoop(const char *data,const char *inputFileList)
      
 	  for(int i=0;i<GenParticles->size();i++)
 	    { if((*GenParticles)[i].Pt()!=0)
-		{ if((abs((*GenParticles_PdgId)[i])==24)&&(abs((*GenParticles_ParentId)[i])==6))
-		    {
-		      if((abs((*GenParticles_PdgId)[i])==11) && (abs((*GenParticles_ParentId)[i])==24 || abs((*GenParticles_ParentId)[i])==15) && ((*GenParticles_Status)[i]==1))
-			{ 
-			  gen_el.push_back((*GenParticles)[i]);
-			  if(abs((*GenParticles_ParentId)[i])<=15)
-			    {gen_tau_el.push_back((*GenParticles)[i]);}
-			}
-		      if((abs((*GenParticles_PdgId)[i])==13) && (abs((*GenParticles_ParentId)[i])==24 || abs((*GenParticles_ParentId)[i])==15) && ((*GenParticles_Status)[i]==1))
-			{ 
-			  gen_mu.push_back((*GenParticles)[i]);
-			  if(abs((*GenParticles_ParentId)[i])<=15)
-			    {gen_tau_mu.push_back((*GenParticles)[i]);}
-			}
-		      if((abs((*GenParticles_PdgId)[i])==15) && (abs((*GenParticles_ParentId)[i])==24))
-			{ 
-			  gen_tau.push_back((*GenParticles)[i]);
-			}
+		
+		{
+		  if((abs((*GenParticles_PdgId)[i])==11) && (abs((*GenParticles_ParentId)[i])==24 || abs((*GenParticles_ParentId)[i])==15) && ((*GenParticles_Status)[i]==1))
+		    { 
+		      gen_el.push_back((*GenParticles)[i]);
+		      if(abs((*GenParticles_ParentId)[i])==15)
+			{gen_tau_el.push_back((*GenParticles)[i]);}
 		    }
-		  if((abs((*GenParticles_PdgId)[i])==22))
+		  else if((abs((*GenParticles_PdgId)[i])==13) && (abs((*GenParticles_ParentId)[i])==24 || abs((*GenParticles_ParentId)[i])==15) && ((*GenParticles_Status)[i]==1))
+		    { 
+		      gen_mu.push_back((*GenParticles)[i]);
+		      if(abs((*GenParticles_ParentId)[i])==15)
+			{gen_tau_mu.push_back((*GenParticles)[i]);}
+		    }
+		  else if((abs((*GenParticles_PdgId)[i])==15) && (abs((*GenParticles_ParentId)[i])==24))
+		    { 
+		      gen_tau.push_back((*GenParticles)[i]);
+		    }
+		    
+		  else if((abs((*GenParticles_PdgId)[i])==22))
 		    {
 		      gen_ph.push_back((*GenParticles)[i]);
 		    }		        
+	    
 		}
 	    }
       
@@ -261,7 +262,7 @@ void lost_el::EventLoop(const char *data,const char *inputFileList)
 		    { match_el=1;
 		      match_el_pt=gen_el[i].Pt();
 		    }
-		  for(int j=0;j<gen_ph.size();i++)
+		  for(int j=0;j<gen_ph.size();j++)
 		    { dr = goodphoton.DeltaR(gen_ph[j]);
 		      if(dr<0.2)
 			{ match_ph=1;
@@ -303,7 +304,7 @@ void lost_el::EventLoop(const char *data,const char *inputFileList)
 
 		  fill_hist(total1,total2,BTags,MET,goodjets.size(),wt);
 
-		  if(isrealphoton || !matched)
+		  if(isrealphoton && !matched)
 		    {
       
 		      // Out of acceptance ////////////////////////////////////////////////
@@ -413,8 +414,8 @@ void lost_el::EventLoop(const char *data,const char *inputFileList)
   
 
 			      bool miniIso=false;
-			      for(int i=0;i<Electrons_MiniIso->size();i++)
-				{ if((*Electrons_MiniIso)[i]<0.1)
+			      for(int j=0;j<Electrons_MiniIso->size();j++)
+				{ if((*Electrons_MiniIso)[j]<0.1)
 				    { miniIso = true;}
 				}
 			      if(miniIso)
@@ -466,18 +467,18 @@ void lost_el::EventLoop(const char *data,const char *inputFileList)
   
   cout<<"Events survived preselection             = "<<survived_events<<endl;
   cout<<"Events survived veto had                 = "<<survived_vetohad<<endl;
-  cout<<"Events not accepted by the detector      = "<<not_accepted<<endl;
-  cout<<"Events survived acceptance cut           = "<<survived_accept<<endl;
   cout<<"Events where gen electron fakes as photon= "<<event_fakephoton<<endl;
   cout<<"Events passing Photon_electronfakes      = "<<event_photonfakes<<endl;
+  cout<<"Events not accepted by the detector      = "<<not_accepted<<endl;
+  cout<<"Events survived acceptance cut           = "<<survived_accept<<endl;
   cout<<"Events failed ID                         = "<<events_id<<endl;
   cout<<"Events survived id cut                   = "<<survived_failed_id<<endl;
   cout<<"Events failed Iso (NElecltrons==0)       = "<<event_failiso<<endl;
   cout<<"Events failed pass iso (!passiso)        = "<<event_failiso2<<endl;
   cout<<"Events failed mini iso (MiniIso>0.2)     = "<<event_failminiiso<<endl;
-  cout<<"Events pass NElectrons>0                 = "<<event_iso<<endl;
+  cout<<"Events pass NElectrons==0                = "<<event_iso<<endl;
   cout<<"Events pass (passIso)                    = "<<event_iso2<<endl;
-  cout<<"Events pass miniiso <0.1                 = "<<event_miniiso<<endl;
+  cout<<"Events pass mini_iso <0.1                = "<<event_miniiso<<endl;
   cout<<"Events survived iso cut                  = "<<survived_failed_iso<<endl;
   cout<<"Events in 1 lepton CR                    = "<<events_cr<<endl;
   cout<<"Events survived all cut                  = "<<survived_all<<endl;

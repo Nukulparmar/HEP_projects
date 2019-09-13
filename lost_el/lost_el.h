@@ -25,7 +25,8 @@ class lost_el : public NtupleVariables{
   void     BookHistogram(const char *);
   bool     electron_match_photon(TLorentzVector);
   void     fill_hist(TH1D *,TH1D *,int,double,int,double);
-  
+  void     fill_hist_2D(TH2D*,int,int,double,double);
+
   // Intialize histos here
 
   TH1D *total1,*total2,*fail_accept1,*fail_accept2,*fail_id1,*fail_id2,*fail_iso1,*fail_iso2,*one_lep_cr1,*one_lep_cr2,*fake_photon1,*fake_photon2;
@@ -34,6 +35,8 @@ class lost_el : public NtupleVariables{
   TH1D *gen_ph_pt,*gen_ph_size[5],*gen_ph_eta;
   TH1D *nel[6],*nmu[6];
   TH1D *mindr_gen_rec_el,*mindr_reco_el_ph[2],*mindr_gen_el_reco_ph[2];
+  TH2D *jet_ptbins,*e_ptbins,*mindr2D_el_jet,*mindr2D_genel_jet;
+  TH1D *jetpt_inbins[9],*ept_inbins[9],*mindr1D_el_jet[9],*mindr1D_genel_jet[9];
   TFile *oFile;
   
 };
@@ -128,7 +131,25 @@ void lost_el::BookHistogram(const char *outFileName) {
   mindr_gen_el_reco_ph[1] = new TH1D("mindr_gen_el_reco_ph_1","MinDr between gen e and reco #gamma after the fake photon cut",500,0,5);
   mindr_reco_el_ph[0] = new TH1D("mindr_reco_el_ph_0","MinDr between reoc e and reco #gamma",500,0,5);
   mindr_reco_el_ph[1] = new TH1D("mindr_reco_el_ph_1","MinDr between reoc e and reco #gamma after the fake photon cut",500,0,5);
-  
+  jet_ptbins = new TH2D("jet_pt_bins","Jet Pts in the njet bins",9,1,10,200,0,600);
+  e_ptbins = new TH2D("e_pt_bins","Electon Pts in the njet bins",9,1,10,200,0,500);
+  mindr2D_el_jet = new TH2D("mindr2D_el_jet","mindr2D electrons and jets in njet bins",9,1,10,200,0,5);
+  mindr2D_genel_jet = new TH2D("mindr2D_genel_jet","mindr2D gen electrons and jets in njet bins",9,1,10,200,0,5);
+  char temp[200],temp2[200];
+  for(int i=0;i<9;i++)
+    { sprintf(temp,"jetpt_inbins_1D_%d",i+1);
+      sprintf(temp2,"Jet Pt in the njet bin number %d",i+1);
+      jetpt_inbins[i]= new TH1D(temp,temp2,200,0,400);
+      sprintf(temp,"el_pt_inbins_1D_%d",i+1);
+      sprintf(temp2,"Electrons Pt in the njet bin number %d",i+1);
+      ept_inbins[i]= new TH1D(temp,temp2,200,0,400);
+      sprintf(temp,"mindr1D_el_jet_%d",i+1);
+      sprintf(temp2,"MinDr reco electron and jet in the njet bin number %d",i+1);
+      mindr1D_el_jet[i]= new TH1D(temp,temp2,200,0,400);
+      sprintf(temp,"mindr1D_genel_jet_%d",i+1);
+      sprintf(temp2,"MinDr reco gen electron and jet in the njet bin number %d",i+1);
+      mindr1D_genel_jet[i]= new TH1D(temp,temp2,200,0,400);
+    }
 }
 
 

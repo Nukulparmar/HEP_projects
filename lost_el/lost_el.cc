@@ -47,7 +47,7 @@ void lost_el::EventLoop(const char *data,const char *inputFileList)
 
   double survived_events =0,survived_vetohad=0,not_accepted=0,survived_accept=0,check=0,survived_failed_id=0,survived_failed_iso=0,survived_all=0,events_cr=0,events_id=0,events_failiso=0;
   int event_iso2=0,event_fakephoton=0,event_miniiso=0,event_failminiiso=0,event_failiso2=0,event_failiso=0,event_photonfakes=0,event_iso=0;
-  
+  int e_mu_event=0;
   ///////////////////////////////////////////////////////////////////////////////////////////////
   for (Long64_t jentry=0; jentry<nentries;jentry++)
     {
@@ -200,7 +200,8 @@ void lost_el::EventLoop(const char *data,const char *inputFileList)
 	    }
       
 	  if(gen_el.size()==0 && gen_mu.size()==0 && gen_tau_el.size()==0 && gen_tau_mu.size()==0) continue; // rejecting hadronic decays
-
+	  if(gen_el.size()==1 && gen_mu.size()==1)
+	    { e_mu_event+=1;}
       
 	  h_el_size[1]->Fill(Electrons->size(),wt);
 	  for(int i=0;i<Electrons->size();i++)
@@ -246,12 +247,22 @@ void lost_el::EventLoop(const char *data,const char *inputFileList)
       
 	  if(gen_el.size()!=0)
 	    {
+	      
+	      // Filling some histograms
+	      for(int j=0;j<goodjets.size();j++)
+		{ fill_hist_2D(jet_ptbins,BTags,goodjets.size(),goodjets[j].Pt(),wt);
+		  fill_hist_2D(mindr2D_el_jet,BTags,goodjets.size(),MinDr(goodjets[j],*Electrons),wt);
+		  fill_hist_2D(mindr2D_genel_jet,BTags,goodjets.size(),MinDr(goodjets[j],gen_el),wt);
+		
+		}
+	      for(int j=0;j<Electrons->size();j++)
+		{ fill_hist_2D(e_ptbins,BTags,goodjets.size(),(*Electrons)[j].Pt(),wt);
+		}
+
+
 	      for(int i=0;i<gen_el.size();i++)
 		{ 
-     
-
-
-		  // Test //////////////////
+		  
 		  // Fake photon /////////////////////////////////////////////////
 		  double dr=100,match_ph_pt=0,match_el_pt=0;
 		  bool isrealphoton = true;
@@ -299,8 +310,8 @@ void lost_el::EventLoop(const char *data,const char *inputFileList)
       
 		  mindr_gen_el_reco_ph[1]->Fill(gen_el[i].DeltaR(goodphoton),wt);
       
-      
-      
+		  
+		  
 
 		  fill_hist(total1,total2,BTags,MET,goodjets.size(),wt);
 
@@ -466,6 +477,7 @@ void lost_el::EventLoop(const char *data,const char *inputFileList)
     }// loop over entries
   
   cout<<"Events survived preselection             = "<<survived_events<<endl;
+  cout<<"Events with gen e and gen mu after presel= "<<e_mu_event<<endl;
   cout<<"Events survived veto had                 = "<<survived_vetohad<<endl;
   cout<<"Events where gen electron fakes as photon= "<<event_fakephoton<<endl;
   cout<<"Events passing Photon_electronfakes      = "<<event_photonfakes<<endl;
@@ -483,7 +495,7 @@ void lost_el::EventLoop(const char *data,const char *inputFileList)
   cout<<"Events in 1 lepton CR                    = "<<events_cr<<endl;
   cout<<"Events survived all cut                  = "<<survived_all<<endl;
   
-  
+
 }
 	
   
@@ -638,4 +650,68 @@ void lost_el::fill_hist(TH1D *h1, TH1D *h2,int btags,double met,int njets,double
 }
 
 
+void lost_el::fill_hist_2D(TH2D *h1,int btags,int njets,double v1,double wt)
+{
+  //h1 = TH1D("h1","lost electron in b-jets and njets bins",6,1,7);
+  //h2 = TH1D("h2","lost electron in all the bins",16,1,17);
+  
+  // h1->Fill("NJets_{=0}^{2-4}",0,0);
+  // h1->Fill("NJets_{= 1}^{2-4}",0);
+  // h1->Fill("NJets_{#geq 2}^{2-4}",0);
+  // h1->Fill("NJets_{=0}^{5-6}",0);
+  // h1->Fill("NJets_{= 1}^{5-6}",0);
+  // h1->Fill("NJets_{#geq 2}^{5-6}",0);
+  // h1->Fill("NJets_{=0}^{#geq 7}",0);
+  // h1->Fill("NJets_{= 1}^{#geq 7}",0);
+  // h1->Fill("NJets_{#geq 2}^{#geq 7}",0);
+  
+  //int njets = goodjets.size();
+  
+  if(btags==0)
+    {
+      if(njets>=2 && njets<=4)
+	{		  
+	  h1->Fill("NJets_{=0}^{2-4}",v1,wt);
+	}
+      if(njets>=5 && njets<=6)
+	{
+	  h1->Fill("NJets_{=0}^{5-6}",v1,wt);
+	}
+      if(njets>=7)
+	{
+	  h1->Fill("NJets_{=0}^{#geq 7}",v1,wt);
+	}
+
+    }
+  if(btags==1)
+    { if(njets>=2 && njets<=4)
+	{
+	  h1->Fill("NJets_{= 1}^{2-4}",v1,wt);
+	}
+      if(njets>=5 && njets<=6)
+	{
+	  h1->Fill("NJets_{= 1}^{5-6}",v1,wt);
+	}
+      if(njets>=7)
+	{
+	  h1->Fill("NJets_{= 1}^{#geq 7}",v1,wt);
+	}
+	      
+    }
+  if(btags>=2)
+    { if(njets>=2 && njets<=4)
+	{
+	  h1->Fill("NJets_{#geq 2}^{2-4}",v1,wt);
+	}
+      if(njets>=5 && njets<=6)
+	{
+	  h1->Fill("NJets_{#geq 2}^{5-6}",v1,wt);
+	}
+      if(njets>=7)
+	{
+	  h1->Fill("NJets_{#geq 2}^{#geq 7}",v1,wt);
+	}
+	      
+    }
+}
 

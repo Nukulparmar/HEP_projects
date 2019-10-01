@@ -1,4 +1,4 @@
-void TF_lost_el(char* input)
+void TF_lost_el(char* input )
 {
   TFile *f1,*f2,*f3,*f4,*f5,*f6;
 
@@ -28,7 +28,7 @@ void TF_lost_el(char* input)
     }
   else if(strcmp(input,"wgjets")==0)
     {
-      f1 = new TFile("../../EHEP_Projects/Summer_2019/WGJets/wgjets_ll.root");
+      f1 = new TFile("output_files/WGJets_lost_el.root");
     }
   else
     { cout<<"please give a proper input"; return 0;
@@ -100,8 +100,9 @@ void TF_lost_el(char* input)
   stack->GetYaxis()->SetLabelSize(0.07);
   stack->GetYaxis()->SetTitle(0);
   stack->GetYaxis()->SetRangeUser(0,2);
-  
-  stack->SetTitle(input);
+  char *title = new char[200];
+  sprintf(title,"%s_MET_200",input);
+  stack->SetTitle(title);
 
 
   legend->AddEntry(cr,"1e CR","f");

@@ -65,9 +65,22 @@ void lost_el::EventLoop(const char *data,const char *inputFileList)
       nb = fChain->GetEntry(jentry);   nbytes += nb;
   
       Double_t wt =35.9*1000*(Weight);
+      
+
+      ////////////////// filters
+      if(strcmp(data,"2016")==1)
+	{
+	  if(PrimaryVertexFilter!=1 || globalSuperTightHalo2016Filter!=1 || HBHEIsoNoiseFilter!=1 || HBHENoiseFilter!=1 || EcalDeadCellTriggerPrimitiveFilter!=1)    continue;
+	  if(BadPFMuonFilter == false) continue;  
+	}
+      if(strcmp(data,"2017")==1)
+	{
+	  if(PrimaryVertexFilter!=1 || globalSuperTightHalo2016Filter!=1 || HBHEIsoNoiseFilter!=1 || HBHENoiseFilter!=1 || EcalDeadCellTriggerPrimitiveFilter!=1)    continue;
+	  if(BadPFMuonFilter == false) continue;  
+	}
 
       vector<TLorentzVector> goodphotons;
-
+     
       for(int i=0;i<Photons->size();i++)
 	{ if(((*Photons)[i].Pt()>100)&&(TMath::Abs((*Photons)[i].Eta())<2.4)&&((*Photons_fullID)[i]==1)&&((*Photons_hasPixelSeed)[i]<0.000001))
 	    { goodphotons.push_back((*Photons)[i]);
@@ -348,7 +361,8 @@ void lost_el::EventLoop(const char *data,const char *inputFileList)
 			  
 			  bool identified = true;
 			  mindr_gen_rec_el ->Fill(MinDr(gen_el[i],*Electrons),wt);
-			  if((MinDr(gen_el[i],*Electrons)>0.2)&&(gen_mu.size()!=1))/* || (gen_el.size()>0 && Electrons->size()==0)))*/
+			  
+			  if((MinDr(gen_el[i],*Electrons)>0.2)&&(gen_mu.size()!=1))/* || (gen_el.size()>0 && Electrons->size()==0)))*/ 
 			    { events_id+=1;
 			      fill_hist(fail_id1,fail_id2,BTags,MET,goodjets.size(),wt);
 			      identified = false;
@@ -604,14 +618,14 @@ void lost_el::fill_hist(TH1D *h1, TH1D *h2,int btags,double met,int njets,double
   //h2 = TH1D("h2","lost electron in all the bins",16,1,17);
   
   h1->Fill("NJets_{=0}^{2-4}",0);
-  h1->Fill("NJets_{= 1}^{2-4}",0);
-  h1->Fill("NJets_{#geq 2}^{2-4}",0);
+  h1->Fill("NJets_{#geq 1}^{2-4}",0);
+  //  h1->Fill("NJets_{#geq 2}^{2-4}",0);
   h1->Fill("NJets_{=0}^{5-6}",0);
-  h1->Fill("NJets_{= 1}^{5-6}",0);
-  h1->Fill("NJets_{#geq 2}^{5-6}",0);
+  h1->Fill("NJets_{#geq 1}^{5-6}",0);
+  // h1->Fill("NJets_{#geq 2}^{5-6}",0);
   h1->Fill("NJets_{=0}^{#geq 7}",0);
-  h1->Fill("NJets_{= 1}^{#geq 7}",0);
-  h1->Fill("NJets_{#geq 2}^{#geq 7}",0);
+  h1->Fill("NJets_{#geq 1}^{#geq 7}",0);
+  // h1->Fill("NJets_{#geq 2}^{#geq 7}",0);
   
   //int njets = goodjets.size();
   
@@ -625,18 +639,18 @@ void lost_el::fill_hist(TH1D *h1, TH1D *h2,int btags,double met,int njets,double
   h2->Fill("NJets_{0}^{5-6} & MET#geq 150",0);
   h2->Fill("NJets_{0}^{#geq7} & 100<MET<150",0);
   h2->Fill("NJets_{0}^{#geq7} & MET#geq 150",0);
-  h2->Fill("NJets_{= 1}^{2-4} & 100<MET<150",0);
-  h2->Fill("NJets_{= 1}^{2-4} & MET#geq 150",0);
-  h2->Fill("NJets_{= 1}^{5-6} & 100<MET<150",0);
-  h2->Fill("NJets_{= 1}^{5-6} & MET#geq 150",0);
-  h2->Fill("NJets_{= 1}^{#geq 7} & 100<MET<150",0);
-  h2->Fill("NJets_{= 1}^{#geq 7} & MET#geq 150",0);
-  h2->Fill("NJets_{#geq 2}^{2-4} & 100<MET<150",0);
-  h2->Fill("NJets_{#geq 2}^{2-4} & MET#geq 150",0);
-  h2->Fill("NJets_{#geq 2}^{5-6} & 100<MET<150",0);
-  h2->Fill("NJets_{#geq 2}^{5-6} & MET#geq 150",0);
-  h2->Fill("NJets_{#geq 2}^{#geq 7} & 100<MET<150",0);
-  h2->Fill("NJets_{#geq 2}^{#geq 7} & MET#geq 150",0);
+  h2->Fill("NJets_{#geq 1}^{2-4} & 100<MET<150",0);
+  h2->Fill("NJets_{#geq 1}^{2-4} & MET#geq 150",0);
+  h2->Fill("NJets_{#geq 1}^{5-6} & 100<MET<150",0);
+  h2->Fill("NJets_{#geq 1}^{5-6} & MET#geq 150",0);
+  h2->Fill("NJets_{#geq 1}^{#geq 7} & 100<MET<150",0);
+  h2->Fill("NJets_{#geq 1}^{#geq 7} & MET#geq 150",0);
+  // h2->Fill("NJets_{#geq 2}^{2-4} & 100<MET<150",0);
+  // h2->Fill("NJets_{#geq 2}^{2-4} & MET#geq 150",0);
+  // h2->Fill("NJets_{#geq 2}^{5-6} & 100<MET<150",0);
+  // h2->Fill("NJets_{#geq 2}^{5-6} & MET#geq 150",0);
+  // h2->Fill("NJets_{#geq 2}^{#geq 7} & 100<MET<150",0);
+  // h2->Fill("NJets_{#geq 2}^{#geq 7} & MET#geq 150",0);
   
   if(btags==0)
     {
@@ -683,60 +697,60 @@ void lost_el::fill_hist(TH1D *h1, TH1D *h2,int btags,double met,int njets,double
 	}
 
     }
-  if(btags==1)
+  if(btags>=1)
     { if(njets>=2 && njets<=4)
 	{
-	  h1->Fill("NJets_{= 1}^{2-4}",wt);
+	  h1->Fill("NJets_{#geq 1}^{2-4}",wt);
 	  if(met>=100 && met<150)
-	    { h2->Fill("NJets_{= 1}^{2-4} & 100<MET<150",wt);}
+	    { h2->Fill("NJets_{#geq 1}^{2-4} & 100<MET<150",wt);}
 	  if(met>=150)
-	    { h2->Fill("NJets_{= 1}^{2-4} & MET#geq 150",wt);}
+	    { h2->Fill("NJets_{#geq 1}^{2-4} & MET#geq 150",wt);}
 	}
       if(njets>=5 && njets<=6)
 	{
-	  h1->Fill("NJets_{= 1}^{5-6}",wt);
+	  h1->Fill("NJets_{#geq 1}^{5-6}",wt);
 	  if(met>=100 && met<150)
-	    { h2->Fill("NJets_{= 1}^{5-6} & 100<MET<150",wt);}
+	    { h2->Fill("NJets_{#geq 1}^{5-6} & 100<MET<150",wt);}
 	  if(met>=150)
-	    { h2->Fill("NJets_{= 1}^{5-6} & MET#geq 150",wt);}
+	    { h2->Fill("NJets_{#geq 1}^{5-6} & MET#geq 150",wt);}
 	}
       if(njets>=7)
 	{
-	  h1->Fill("NJets_{= 1}^{#geq 7}",wt);
+	  h1->Fill("NJets_{#geq 1}^{#geq 7}",wt);
 	  if(met>=100 && met<150)
-	    { h2->Fill("NJets_{= 1}^{#geq 7} & 100<MET<150",wt);}
+	    { h2->Fill("NJets_{#geq 1}^{#geq 7} & 100<MET<150",wt);}
 	  if(met>=150)
-	    { h2->Fill("NJets_{= 1}^{#geq 7} & MET#geq 150",wt);}
+	    { h2->Fill("NJets_{#geq 1}^{#geq 7} & MET#geq 150",wt);}
 	}
 	      
     }
-  if(btags>=2)
-    { if(njets>=2 && njets<=4)
-	{
-	  h1->Fill("NJets_{#geq 2}^{2-4}",wt);
-	  if(met>=100 && met<150)
-	    { h2->Fill("NJets_{#geq 2}^{2-4} & 100<MET<150",wt);}
-	  if(met>=150)
-	    { h2->Fill("NJets_{#geq 2}^{2-4} & MET#geq 150",wt);}
-	}
-      if(njets>=5 && njets<=6)
-	{
-	  h1->Fill("NJets_{#geq 2}^{5-6}",wt);
-	  if(met>=100 && met<150)
-	    { h2->Fill("NJets_{#geq 2}^{5-6} & 100<MET<150",wt);}
-	  if(met>=150)
-	    { h2->Fill("NJets_{#geq 2}^{5-6} & MET#geq 150",wt);}
-	}
-      if(njets>=7)
-	{
-	  h1->Fill("NJets_{#geq 2}^{#geq 7}",wt);
-	  if(met>=100 && met<150)
-	    { h2->Fill("NJets_{#geq 2}^{#geq 7} & 100<MET<150",wt);}
-	  if(met>=150)
-	    { h2->Fill("NJets_{#geq 2}^{#geq 7} & MET#geq 150",wt);}
-	}
+  // if(btags>=2)
+  //   { if(njets>=2 && njets<=4)
+  // 	{
+  // 	  h1->Fill("NJets_{#geq 2}^{2-4}",wt);
+  // 	  if(met>=100 && met<150)
+  // 	    { h2->Fill("NJets_{#geq 2}^{2-4} & 100<MET<150",wt);}
+  // 	  if(met>=150)
+  // 	    { h2->Fill("NJets_{#geq 2}^{2-4} & MET#geq 150",wt);}
+  // 	}
+  //     if(njets>=5 && njets<=6)
+  // 	{
+  // 	  h1->Fill("NJets_{#geq 2}^{5-6}",wt);
+  // 	  if(met>=100 && met<150)
+  // 	    { h2->Fill("NJets_{#geq 2}^{5-6} & 100<MET<150",wt);}
+  // 	  if(met>=150)
+  // 	    { h2->Fill("NJets_{#geq 2}^{5-6} & MET#geq 150",wt);}
+  // 	}
+  //     if(njets>=7)
+  // 	{
+  // 	  h1->Fill("NJets_{#geq 2}^{#geq 7}",wt);
+  // 	  if(met>=100 && met<150)
+  // 	    { h2->Fill("NJets_{#geq 2}^{#geq 7} & 100<MET<150",wt);}
+  // 	  if(met>=150)
+  // 	    { h2->Fill("NJets_{#geq 2}^{#geq 7} & MET#geq 150",wt);}
+  // 	}
 	      
-    }
+  //   }
 }
 
 

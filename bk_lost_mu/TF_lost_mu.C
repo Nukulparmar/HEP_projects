@@ -1,20 +1,19 @@
-void TF_lost_el(char* input, int year)
+void TF_lost_mu(char* input,int year)
 {
-  TFile *f1;
-
+  TFile *f1,*f2;
   if(year == 2016)
     {
       if(strcmp(input,"ttgjets")==0)
 	{
-	  f1 = new TFile("output_files/TTGJets_lost_el.root");
+	  f1 = new TFile("output_files/TTGJets_lost_mu.root");
 	}
       else if(strcmp(input,"wgjets")==0)
 	{
-	  f1 = new TFile("output_files/WGJets_lost_el.root");
+	  f1 = new TFile("output_files/WGJets_lost_mu.root");
 	}
       else if(strcmp(input,"both")==0)
 	{
-	  f1 = new TFile("output_files/both_lost_el.root");
+	  f1 = new TFile("output_files/both_lost_mu.root");
 	}
       else
 	{ cout<<"please give a proper input"; return 0;
@@ -24,15 +23,15 @@ void TF_lost_el(char* input, int year)
     { 
       if(strcmp(input,"ttgjets")==0)
 	{
-	  f1 = new TFile("output_files/TTGJets_lost_el_2017.root");
+	  f1 = new TFile("output_files/TTGJets_lost_mu_2017.root");
 	}
       else if(strcmp(input,"wgjets")==0)
 	{
-	  f1 = new TFile("output_files/WGJets_lost_el_2017.root");
+	  f1 = new TFile("output_files/WGJets_lost_mu_2017.root");
 	}
       else if(strcmp(input,"both")==0)
 	{
-	  f1 = new TFile("output_files/both_lost_el_2017.root");
+	  f1 = new TFile("output_files/both_lost_mu_2017.root");
 	}
       else
 	{ cout<<"please give a proper input"; return 0;
@@ -42,38 +41,42 @@ void TF_lost_el(char* input, int year)
     { 
       if(strcmp(input,"ttgjets")==0)
 	{
-	  f1 = new TFile("output_files/TTGJets_lost_el_2018.root");
+	  f1 = new TFile("output_files/TTGJets_lost_mu_2018.root");
 	}
       else if(strcmp(input,"wgjets")==0)
 	{
-	  f1 = new TFile("output_files/WGJets_lost_el_2018.root");
+	  f1 = new TFile("output_files/WGJets_lost_mu_2018.root");
 	}
       else if(strcmp(input,"both")==0)
 	{
-	  f1 = new TFile("output_files/both_lost_el_2018.root");
+	  f1 = new TFile("output_files/both_lost_mu_2018.root");
 	}
       else
 	{ cout<<"please give a proper input"; return 0;
 	}
     }
-  // const char* str[9] = {"NJets_{=0}^{2-4}","NJets_{= 1}^{2-4}","NJets_{#geq 2}^{2-4}","NJets_{=0}^{5-6}","NJets_{= 1}^{5-6}","NJets_{#geq 2}^{5-6}","NJets_{=0}^{#geq 7}","NJets_{= 1}^{#geq 7}","NJets_{#geq 2}^{#geq 7}"};
+  
+  //  const char* str[9] = {"NJets_{=0}^{2-4}","NJets_{= 1}^{2-4}","NJets_{#geq 2}^{2-4}","NJets_{=0}^{5-6}","NJets_{= 1}^{5-6}","NJets_{#geq 2}^{5-6}","NJets_{=0}^{#geq 7}","NJets_{= 1}^{#geq 7}","NJets_{#geq 2}^{#geq 7}"};
   
   const char* str[6] = {"NJets_{=0}^{2-4}","NJets_{#geq 1}^{2-4}","NJets_{=0}^{5-6}","NJets_{#geq 1}^{5-6}","NJets_{=0}^{#geq 7}","NJets_{#geq 1}^{#geq 7}"};
-  
 
-  TH1D *fail_accept,*fail_id,*fail_iso,*cr,*fake_photon;
+  
+  TH1D *fail_accept,*fail_id,*fail_iso,*cr,*fake_photon,*hadtau;
   
   fake_photon = (TH1D*)f1->Get("fake_photon_1");
   fail_accept = (TH1D*)f1->Get("fail_accept_1");
   fail_id     = (TH1D*)f1->Get("fail_id_1");
   fail_iso    = (TH1D*)f1->Get("fail_iso_1");
   cr          = (TH1D*)f1->Get("one_lep_cr_1");
+  //  hadtau      = (TH1D*)f2->Get("had_tau");
+  hadtau      = (TH1D*)f1->Get("hadtau1");
   TH1D *total = new TH1D("total","Total = fail_id+fail_iso+fail_accept+1e_cr",6,1,7);
   for(int i=1;i<=6;i++)
     { total->GetXaxis()->SetBinLabel(i,str[i-1]);}
   total->Add(fail_accept);
   total->Add(fail_id);
   total->Add(fail_iso);
+  total->Add(hadtau);
   total->Add(cr);
 
 
@@ -83,6 +86,7 @@ void TF_lost_el(char* input, int year)
   fail_accept->Divide(total);
   fail_id->Divide(total);
   fail_iso->Divide(total);
+  hadtau->Divide(total);
   cr->Divide(total);
   
   THStack *stack = new THStack("Stack","stack hist");
@@ -106,7 +110,9 @@ void TF_lost_el(char* input, int year)
   fail_id->SetFillColor(kRed);
   fail_iso->SetFillStyle(3144);
   fail_iso->SetFillColor(kBlue+3);
-  fake_photon->SetFillColor(kBlue-9);
+  //fake_photon->SetFillColor(kBlue-9);
+  hadtau->SetFillStyle(3444);
+  hadtau->SetFillColor(kViolet+6);
   cr->SetFillColor(kGray);
   
   TLegend *legend = new TLegend(0.7,0.2,0.9,0.4);
@@ -114,9 +120,10 @@ void TF_lost_el(char* input, int year)
   stack->Add(fail_accept);
   stack->Add(fail_id);
   stack->Add(fail_iso);
+  stack->Add(hadtau);
   // stack->Add(fake_photon);
   stack->Draw("hist");
-  legend->SetNColumns(2);
+  legend->SetNColumns(3);
   legend->SetBorderSize(1);
 
   stack->GetYaxis()->SetTitleSize(0.05);
@@ -124,23 +131,17 @@ void TF_lost_el(char* input, int year)
   stack->GetYaxis()->SetLabelSize(0.07);
   stack->GetYaxis()->SetTitle(0);
   stack->GetYaxis()->SetRangeUser(0,2);
-  //char *title = new char[200];
-  //sprintf(title,"%s lost e^-",input);
+   char *title = new char[200];
+   sprintf(title,"lost #mu + hadronic #tau - %d",year);
+  
+  stack->SetTitle(title);
 
-  if(year == 2016)
-    {   stack->SetTitle("lost e^{-} 2016");}
-  
-  if(year == 2017)
-    {   stack->SetTitle("lost e^{-} 2017");}
-  
-  if(year == 2018)
-    {   stack->SetTitle("lost e^{-} 2018");}
-  
 
   legend->AddEntry(cr,"1e CR","f");
   legend->AddEntry(fail_accept,"Fail Accept","f");
   legend->AddEntry(fail_id,"Fail Id","f");
   legend->AddEntry(fail_iso,"Fail Iso","f");
+  legend->AddEntry(hadtau,"hadtronic #tau","f");
   //legend->AddEntry(fake_photon,"Fake photon","f");
   legend->SetTextSize(0.03);
   legend->Draw();
@@ -154,6 +155,8 @@ void TF_lost_el(char* input, int year)
   TF->Add(fail_accept);
   TF->Add(fail_id);
   TF->Add(fail_iso);
+  TF->Add(hadtau);
+  
   //TF->Add(fake_photon_1);
   TF->GetYaxis()->SetRangeUser(0,2);
   TF->Sumw2();

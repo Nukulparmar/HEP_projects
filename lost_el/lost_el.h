@@ -50,18 +50,18 @@ void lost_el::BookHistogram(const char *outFileName) {
   oFile = new TFile(outFileName, "recreate");
   // Define Histos here
 
-  total1 = new TH1D("total1","lost electron in b-jets and njets bins",9,1,10);
-  total2 = new TH1D("total2","lost electron in all the bins",22,1,23);
-  fail_accept1 = new TH1D("fail_accept_1","Fail Acceptance in b-jets and njets bins",9,1,10);
-  fail_accept2 = new TH1D("fail_accept_2","Fail Acceptance in all the bins",22,1,23);
-  fail_id1 = new TH1D("fail_id_1","Fail Id in b-jets and njets bins",9,1,10);
-  fail_id2 = new TH1D("fail_id_2","Fail Id in all the bins",22,1,23);
-  fail_iso1 = new TH1D("fail_iso_1","Fail Iso in b-jets and njets bins",9,1,10);
-  fail_iso2 = new TH1D("fail_iso_2","Fail Iso in all the bins",22,1,23);
-  one_lep_cr1 = new TH1D("one_lep_cr_1","1 lep cr in b-jets and njets bins",9,1,10);
-  one_lep_cr2 = new TH1D("one_lep_cr_2","1 lep cr in all the bins",22,1,23);
-  fake_photon1 = new TH1D("fake_photon_1","1 lep cr in b-jets and njets bins",9,1,10);
-  fake_photon2 = new TH1D("fake_photon_2","1 lep cr in all the bins",22,1,23);
+  total1 = new TH1D("total1","lost electron in b-jets and njets bins",6,1,7);
+  total2 = new TH1D("total2","lost electron in all the bins",16,1,17);
+  fail_accept1 = new TH1D("fail_accept_1","Fail Acceptance in b-jets and njets bins",6,1,7);
+  fail_accept2 = new TH1D("fail_accept_2","Fail Acceptance in all the bins",16,1,17);
+  fail_id1 = new TH1D("fail_id_1","Fail Id in b-jets and njets bins",6,1,7);
+  fail_id2 = new TH1D("fail_id_2","Fail Id in all the bins",16,1,17);
+  fail_iso1 = new TH1D("fail_iso_1","Fail Iso in b-jets and njets bins",6,1,7);
+  fail_iso2 = new TH1D("fail_iso_2","Fail Iso in all the bins",16,1,17);
+  one_lep_cr1 = new TH1D("one_lep_cr_1","1 lep cr in b-jets and njets bins",6,1,7);
+  one_lep_cr2 = new TH1D("one_lep_cr_2","1 lep cr in all the bins",16,1,17);
+  fake_photon1 = new TH1D("fake_photon_1","1 lep cr in b-jets and njets bins",6,1,7);
+  fake_photon2 = new TH1D("fake_photon_2","1 lep cr in all the bins",16,1,17);
   
   
   h_st = new TH1D("h_ht","HT after all the preselection",700,0,7000);
@@ -145,10 +145,10 @@ void lost_el::BookHistogram(const char *outFileName) {
       ept_inbins[i]= new TH1D(temp,temp2,200,0,400);
       sprintf(temp,"mindr1D_el_jet_%d",i+1);
       sprintf(temp2,"MinDr reco electron and jet in the njet bin number %d",i+1);
-      mindr1D_el_jet[i]= new TH1D(temp,temp2,200,0,400);
+      mindr1D_el_jet[i]= new TH1D(temp,temp2,600,0,6);
       sprintf(temp,"mindr1D_genel_jet_%d",i+1);
       sprintf(temp2,"MinDr reco gen electron and jet in the njet bin number %d",i+1);
-      mindr1D_genel_jet[i]= new TH1D(temp,temp2,200,0,400);
+      mindr1D_genel_jet[i]= new TH1D(temp,temp2,600,0,6);
     }
 }
 

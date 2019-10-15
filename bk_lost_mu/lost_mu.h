@@ -28,12 +28,13 @@ class lost_mu : public NtupleVariables{
 
   // Intialize histos here
 
-  TH1D *total1,*total2,*fail_accept1,*fail_accept2,*fail_id1,*fail_id2,*fail_iso1,*fail_iso2,*one_lep_cr1,*one_lep_cr2,*fake_photon1,*fake_photon2;
+  TH1D *total1,*total2,*fail_accept1,*fail_accept2,*fail_id1,*fail_id2,*fail_iso1,*fail_iso2,*one_lep_cr1,*one_lep_cr2,*fake_photon1,*fake_photon2,*hadtau1,*hadtau2;
   TH1D *h_st,*h_met,*h_lead_ph_pt[2],*h_lead_ph_eta[2],*h_njets,*h_el_size[2],*h_mu_size[2],*h_el_pt[2],*h_el_eta[2],*h_mu_pt[2],*h_mu_eta[2];
   TH1D *gen_el_pt,*gen_el_size[5],*gen_el_eta,*gen_mu_pt,*gen_mu_eta,*gen_mu_size[5],*gen_tau_size;
   TH1D *gen_ph_pt,*gen_ph_size[5],*gen_ph_eta;
   TH1D *nel[6],*nmu[6];
   TH1D *mindr_gen_rec_mu,*mindr_reco_el_ph[2],*mindr_gen_el_reco_ph[2];
+ 
   TFile *oFile;
   
   
@@ -50,18 +51,20 @@ void lost_mu::BookHistogram(const char *outFileName) {
   // Define Histos here
 
  
-  total1 = new TH1D("total1","lost electron in b-jets and njets bins",9,1,10);
-  total2 = new TH1D("total2","lost electron in all the bins",22,1,23);
-  fail_accept1 = new TH1D("fail_accept_1","Fail Acceptance in b-jets and njets bins",9,1,10);
-  fail_accept2 = new TH1D("fail_accept_2","Fail Acceptance in all the bins",22,1,23);
-  fail_id1 = new TH1D("fail_id_1","Fail Id in b-jets and njets bins",9,1,10);
-  fail_id2 = new TH1D("fail_id_2","Fail Id in all the bins",22,1,23);
-  fail_iso1 = new TH1D("fail_iso_1","Fail Iso in b-jets and njets bins",9,1,10);
-  fail_iso2 = new TH1D("fail_iso_2","Fail Iso in all the bins",22,1,23);
-  one_lep_cr1 = new TH1D("one_lep_cr_1","1 lep cr in b-jets and njets bins",9,1,10);
-  one_lep_cr2 = new TH1D("one_lep_cr_2","1 lep cr in all the bins",22,1,23);
-  fake_photon1 = new TH1D("fake_photon_1","1 lep cr in b-jets and njets bins",9,1,10);
-  fake_photon2 = new TH1D("fake_photon_2","1 lep cr in all the bins",22,1,23);
+  total1 = new TH1D("total1","lost electron in b-jets and njets bins",6,1,7);
+  total2 = new TH1D("total2","lost electron in all the bins",16,1,17);
+  fail_accept1 = new TH1D("fail_accept_1","Fail Acceptance in b-jets and njets bins",6,1,7);
+  fail_accept2 = new TH1D("fail_accept_2","Fail Acceptance in all the bins",16,1,17);
+  fail_id1 = new TH1D("fail_id_1","Fail Id in b-jets and njets bins",6,1,7);
+  fail_id2 = new TH1D("fail_id_2","Fail Id in all the bins",16,1,17);
+  fail_iso1 = new TH1D("fail_iso_1","Fail Iso in b-jets and njets bins",6,1,7);
+  fail_iso2 = new TH1D("fail_iso_2","Fail Iso in all the bins",16,1,17);
+  one_lep_cr1 = new TH1D("one_lep_cr_1","1 lep cr in b-jets and njets bins",6,1,7);
+  one_lep_cr2 = new TH1D("one_lep_cr_2","1 lep cr in all the bins",16,1,17);
+  fake_photon1 = new TH1D("fake_photon_1","1 lep cr in b-jets and njets bins",6,1,7);
+  fake_photon2 = new TH1D("fake_photon_2","1 lep cr in all the bins",16,1,17);
+  hadtau1 = new TH1D("hadtau1","Hadronic #tau in b-jets and njets bins",6,1,7);
+  hadtau2 = new TH1D("hadtau2","Hadronic  #tau in all the bins",16,1,17);
   
   
   h_st = new TH1D("h_ht","HT after all the preselection",700,0,7000);

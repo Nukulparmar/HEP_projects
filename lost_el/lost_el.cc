@@ -82,7 +82,7 @@ void lost_el::EventLoop(const char *data,const char *inputFileList)
       vector<TLorentzVector> goodphotons;
      
       for(int i=0;i<Photons->size();i++)
-	{ if(((*Photons)[i].Pt()>100)&&(TMath::Abs((*Photons)[i].Eta())<2.4)&&((*Photons_fullID)[i]==1)&&((*Photons_hasPixelSeed)[i]<0.000001)&&((TMath::Abs((*Photons)[i].Eta())<1.566)&&(TMath::Abs((*Photons)[i].Eta())>1.4446)))
+	{ if(((*Photons)[i].Pt()>100)&&(TMath::Abs((*Photons)[i].Eta())<2.4)&&((*Photons_fullID)[i]==1)&&((*Photons_hasPixelSeed)[i]<0.000001)/*&&((TMath::Abs((*Photons)[i].Eta())>1.566)&&(TMath::Abs((*Photons)[i].Eta())<1.4446))*/)
 	    { goodphotons.push_back((*Photons)[i]);
 	      
 	    }
@@ -157,6 +157,7 @@ void lost_el::EventLoop(const char *data,const char *inputFileList)
       h_el_size[0]->Fill(Electrons->size(),wt);
       for(int i=0;i<Electrons->size();i++)
 	{ h_el_pt[0]->Fill((*Electrons)[i].Pt(),wt);
+
 	  h_el_eta[0]->Fill((*Electrons)[i].Eta(),wt);
 	}
       
@@ -276,7 +277,7 @@ void lost_el::EventLoop(const char *data,const char *inputFileList)
 		{ fill_hist_2D(e_ptbins,BTagsDeepCSV,goodjets.size(),(*Electrons)[j].Pt(),wt);
 		}
 		  
-	      int total_lost_el = 0;
+	      int total_lost_el = 0,cr_el=0;
 	      for(int i=0;i<gen_el.size();i++)
 		{ 
 		  events_gen_el+=1;
@@ -342,7 +343,7 @@ void lost_el::EventLoop(const char *data,const char *inputFileList)
 		      // Out of acceptance ////////////////////////////////////////////////
 		      
 		      acceptance = true;
-		      if((abs(gen_el[i].Eta())>2.5)||(gen_el[i].Pt()<10)&&(gen_mu.size()!=1))
+		      if((abs(gen_el[i].Eta())>2.5)||(gen_el[i].Pt()<10)&&(gen_mu.size()!=1)||(Electrons->size()==0))
 			{ not_accepted+=1;
 			  fill_hist(fail_accept1,fail_accept2,BTagsDeepCSV,MET,goodjets.size(),wt);
 			  acceptance =false;
@@ -415,8 +416,8 @@ void lost_el::EventLoop(const char *data,const char *inputFileList)
 			  total_lost_el += 1;  
 			}
 		      
-		      // if(isol && acceptance && identified) 
-		      // 	{
+		      if(isol && acceptance && identified) 
+		      	{
 			  
 			  
 			  /////////////////////////////////////////////////////////
@@ -428,12 +429,13 @@ void lost_el::EventLoop(const char *data,const char *inputFileList)
 			  gen_ph_size[3]->Fill(gen_ph.size(),wt);
 			  // 1 Lepton CR ///////////////////////////////////////////
 			  cr = true;
-			  if((NElectrons == 1))
+			  if((NElectrons == 1)&&(cr_el<1))
 			    { events_cr+=1;
 			      fill_hist(one_lep_cr1,one_lep_cr2,BTagsDeepCSV,MET,goodjets.size(),wt);
 			      cr = false;
+			      cr_el+=1;
 			    }
-			  //	}
+			}
 		      if(cr) 
 			{
 			  
@@ -582,12 +584,14 @@ void lost_el::EventLoop(const char *data,const char *inputFileList)
 		    
 		 
 		}// loop over gen_electrons
-	      if(total_lost_el!=0)
-		{
-		  fill_hist(lost_event1,lost_event2,BTagsDeepCSV,MET,goodjets.size(),wt);
-		  count_lost_events +=1;
-		}
-
+	      if(cr_el>=2)
+	      	{ cout<<"problem"<<endl;}
+	      if(total_lost_el==2 || (total_lost_el==1 && cr_el!=1) )
+	      	{ 
+	      	  fill_hist(lost_event1,lost_event2,BTagsDeepCSV,MET,goodjets.size(),wt);
+	      	  count_lost_events +=1;
+	      	}
+	    	    
 	      //}// end of gen_mu condition
 	    }// end of gen_el.size()!=0 condition
 	 

@@ -17,16 +17,17 @@
 class lost_el : public NtupleVariables{
 
  public:
-  lost_el(const TString &inputFileList="foo.txt", const char *outFileName="histo.root",const char *dataset="data");
+  lost_el(const TString &inputFileList="foo.txt", const char *outFileName="histo.root",const char *dataset="data",const char *year="year");
   ~lost_el();
   Bool_t   FillChain(TChain *chain, const TString &inputFileList);
   Long64_t LoadTree(Long64_t entry);
-  void     EventLoop(const char *,const char *);
+  void     EventLoop(const char *,const char *,const char *);
   void     BookHistogram(const char *);
   bool     electron_match_photon(TLorentzVector);
   void     fill_hist(TH1D *,TH1D *,int,double,int,double);
   void     fill_hist_2D(TH2D*,int,int,double,double);
-
+  void     SR_hist(TH1D *,int,double,int,double,const char *,int);
+  
   // Intialize histos here
 
   TH1D *total1,*total2,*fail_accept1,*fail_accept2,*fail_id1,*fail_id2,*fail_iso1,*fail_iso2,*one_lep_cr1,*one_lep_cr2,*fake_photon1,*fake_photon2;
@@ -37,6 +38,12 @@ class lost_el : public NtupleVariables{
   TH1D *mindr_gen_rec_el,*mindr_reco_el_ph[2],*mindr_gen_el_reco_ph[2];
   TH2D *jet_ptbins,*e_ptbins,*mindr2D_el_jet,*mindr2D_genel_jet;
   TH1D *jetpt_inbins[9],*ept_inbins[9],*mindr1D_el_jet[9],*mindr1D_genel_jet[9];
+  TH1D *lost_event1,*lost_event2;
+  TH1D *h_mindr_ph_lep,*h_mindr_ph_qu,*h_mindr_lep_ph,*h_mindr_qu_ph,*h_mindr_goodph_lep;
+  TH1D *h_madminphotonDR;
+  TH1D *cr_pred1,*cr_pred2;
+  TH1D *srbins_lostel,*srbins_cr;
+  TH2D *METNJ_B0_E0,*METNJ_B1_E0,*METNJ_B0_E1,*METNJ_B1_E1,*TF_B0,*TF_B1;
   TFile *oFile;
   
 };
@@ -49,7 +56,20 @@ void lost_el::BookHistogram(const char *outFileName) {
   
   oFile = new TFile(outFileName, "recreate");
   // Define Histos here
-
+  Double_t metbins[]={0,100,150,5000};
+  Double_t njetsbins_b0[]={0,2,3,4,6,7,20};
+  Double_t njetsbins_b1[]={0,2,4,6,7,20};
+  
+  METNJ_B0_E0 = new TH2D("METNJ_B0_E0","SR for Bjets=0 in met and njet bins",3,metbins,6,njetsbins_b0); 
+  METNJ_B0_E1 = new TH2D("METNJ_B0_E1","CR for Bjets=0 in met and njet bins",3,metbins,6,njetsbins_b0);
+  METNJ_B1_E0 = new TH2D("METNJ_B1_E0","SR for Bjets>=1 in met and njet bins",3,metbins,5,njetsbins_b1);
+  METNJ_B1_E1 = new TH2D("METNJ_B1_E1","CR for Bjets>=1 in met and njet bins",3,metbins,5,njetsbins_b1);
+  TF_B0       = new TH2D("TF_B0","Transfer factors for BJets=0 in met and njet bins",3,metbins,5,njetsbins_b0);
+  TF_B1       = new TH2D("TF_B1","Transfer factors for BJets>=1 in met and njet bins",3,metbins,5,njetsbins_b1);
+  
+  // srbins_cr = new TH1D("srbins_cr","1 e^- CR in SR_bins",25,1,26);
+  // srbins_lostel = new TH1D("srbins_lostel","lost electron in SR_bins",25,1,26);
+  
   total1 = new TH1D("total1","lost electron in b-jets and njets bins",6,1,7);
   total2 = new TH1D("total2","lost electron in all the bins",16,1,17);
   fail_accept1 = new TH1D("fail_accept_1","Fail Acceptance in b-jets and njets bins",6,1,7);
@@ -60,9 +80,12 @@ void lost_el::BookHistogram(const char *outFileName) {
   fail_iso2 = new TH1D("fail_iso_2","Fail Iso in all the bins",16,1,17);
   one_lep_cr1 = new TH1D("one_lep_cr_1","1 lep cr in b-jets and njets bins",6,1,7);
   one_lep_cr2 = new TH1D("one_lep_cr_2","1 lep cr in all the bins",16,1,17);
-  fake_photon1 = new TH1D("fake_photon_1","1 lep cr in b-jets and njets bins",6,1,7);
-  fake_photon2 = new TH1D("fake_photon_2","1 lep cr in all the bins",16,1,17);
-  
+  fake_photon1 = new TH1D("fake_photon_1","fake photon in b-jets and njets bins",6,1,7);
+  fake_photon2 = new TH1D("fake_photon_2","fake photon in all the bins",16,1,17);
+  lost_event1 = new TH1D("lost_event_1","lost event in b-jets and njets bins",6,1,7);
+  lost_event2 = new TH1D("lost_event_2","lost event in all the bins",16,1,17);
+  cr_pred1 = new TH1D("cr_pred_1","1 lep cr in b-jets and njets bins",6,1,7);
+  cr_pred2 = new TH1D("cr_pred_2","1 lep cr in all the bins",16,1,17);
   
   h_st = new TH1D("h_ht","HT after all the preselection",700,0,7000);
   h_met = new TH1D("h_met","MET after all the preselection",200,0,2000);
@@ -150,18 +173,25 @@ void lost_el::BookHistogram(const char *outFileName) {
       sprintf(temp2,"MinDr reco gen electron and jet in the njet bin number %d",i+1);
       mindr1D_genel_jet[i]= new TH1D(temp,temp2,600,0,6);
     }
+  h_mindr_ph_lep = new TH1D("mindr_ph_lep","MinDr between the #gamma and lepton (e,#mu,#tau)",200,0,2);
+  h_mindr_ph_qu  = new TH1D("mindr_ph_qu","MinDr between the #gamma and quarks (q,g)",200,0,2);
+  h_mindr_lep_ph = new TH1D("mindr_lep_ph","MinDr between the lepton (e,#mu,#tau) and #gamma ",200,0,2);
+  h_mindr_qu_ph  = new TH1D("mindr_qu_ph","MinDr between the quarks (q,g) and #gamma ",200,0,2);
+  h_madminphotonDR = new TH1D("madphotonminDr","MinDr between the #gamma and quarks (q,g) using madMinPhotonDeltaR",200,0,2);
+  h_mindr_goodph_lep = new TH1D("mindr_goodph_lep","MinDr between the good #gamma and lepton (e,#mu,#tau)",200,0,2);
 }
 
 
-lost_el::lost_el(const TString &inputFileList, const char *outFileName, const char* dataset) {
+lost_el::lost_el(const TString &inputFileList, const char *outFileName, const char* dataset, const char* year) {
   
   string nameData=dataset;//vvv
+  string nameyear=year;
   TChain *tree = new TChain("PreSelection");
   //  tree = new TChain("TreeMaker2/PreSelection");//vvv
   if( ! FillChain(tree, inputFileList) ) {
     std::cerr << "Cannot get the tree " << std::endl;
   } else {
-    std::cout << "Initiating analysis of dataset " << dataset << std::endl;
+    std::cout << "Initiating analysis of dataset " << dataset << " and year " << year << std::endl;
   }
   
   /* if(nameData!="signalH") nameData="BG"; */
